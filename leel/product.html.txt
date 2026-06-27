@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Product — LEEL</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --black: #0a0a0a; --white: #ffffff;
+      --gray-light: #f5f5f5; --gray-mid: #e0e0e0;
+      --gray-dark: #888888; --gold: #c9a96e;
+      --font-en: 'Cormorant Garamond', serif;
+      --font-kr: 'Noto Sans KR', sans-serif;
+    }
+    body { font-family: var(--font-kr); background: var(--white); color: var(--black); }
+
+    header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 48px; height: 72px;
+      background: rgba(255,255,255,0.96); backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--gray-mid);
+    }
+    .logo { font-family: var(--font-en); font-size: 28px; font-weight: 600; letter-spacing: 6px; color: var(--black); text-decoration: none; }
+    nav { display: flex; gap: 36px; }
+    nav a { font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: var(--black); text-decoration: none; }
+    .header-icons { display: flex; gap: 20px; align-items: center; }
+    .icon-btn { background: none; border: none; cursor: pointer; font-size: 18px; color: var(--black); position: relative; }
+    .cart-badge { position: absolute; top: -6px; right: -8px; background: var(--black); color: var(--white); font-size: 9px; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+    /* BREADCRUMB */
+    .breadcrumb { margin-top: 72px; padding: 16px 48px; font-size: 12px; color: var(--gray-dark); letter-spacing: 1px; border-bottom: 1px solid var(--gray-mid); }
+    .breadcrumb a { color: var(--gray-dark); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--black); }
+    .breadcrumb span { margin: 0 8px; }
+
+    /* PRODUCT DETAIL */
+    .product-detail { display: grid; grid-template-columns: 1fr 1fr; gap: 0; min-height: calc(100vh - 120px); }
+
+    /* IMAGE SECTION */
+    .product-images { padding: 40px 48px; }
+    .main-img {
+      width: 100%; aspect-ratio: 3/4; background: var(--gray-light);
+      overflow: hidden; margin-bottom: 16px; position: relative;
+    }
+    .main-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s; }
+    .main-img:hover img { transform: scale(1.04); }
+    .img-thumbnails { display: flex; gap: 12px; }
+    .thumb {
+      width: 80px; height: 100px; background: var(--gray-light); overflow: hidden;
+      cursor: pointer; border: 2px solid transparent; transition: border-color 0.2s; flex-shrink: 0;
+    }
+    .thumb.active { border-color: var(--black); }
+    .thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* INFO SECTION */
+    .product-info { padding: 60px 48px; border-left: 1px solid var(--gray-mid); position: sticky; top: 72px; height: fit-content; }
+    .product-category-tag { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--gold); margin-bottom: 12px; font-family: var(--font-en); }
+    .product-title { font-family: var(--font-en); font-size: 36px; font-weight: 300; letter-spacing: 3px; margin-bottom: 16px; line-height: 1.2; }
+    .product-price-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+    .price-main { font-family: var(--font-en); font-size: 28px; font-weight: 300; }
+    .price-original { font-family: var(--font-en); font-size: 20px; color: var(--gray-dark); text-decoration: line-through; }
+    .price-badge { background: #c0392b; color: var(--white); font-size: 11px; padding: 3px 8px; letter-spacing: 1px; }
+    .product-rating { display: flex; align-items: center; gap: 8px; margin-bottom: 24px; font-size: 13px; color: var(--gray-dark); }
+    .stars { color: var(--gold); letter-spacing: 2px; }
+
+    .divider { height: 1px; background: var(--gray-mid); margin: 24px 0; }
+
+    .option-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--gray-dark); margin-bottom: 12px; display: flex; justify-content: space-between; }
+    .option-label a { color: var(--black); text-decoration: underline; font-size: 11px; }
+
+    .size-options { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+    .size-btn {
+      padding: 10px 20px; border: 1px solid var(--gray-mid); background: none;
+      font-size: 13px; cursor: pointer; transition: all 0.2s; font-family: var(--font-kr);
+      min-width: 52px; text-align: center;
+    }
+    .size-btn:hover { border-color: var(--black); }
+    .size-btn.active { background: var(--black); color: var(--white); border-color: var(--black); }
+    .size-btn.sold-out { color: var(--gray-mid); cursor: not-allowed; position: relative; }
+    .size-btn.sold-out::after { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: var(--gray-mid); }
+
+    .color-options { display: flex; gap: 10px; margin-bottom: 24px; }
+    .color-btn {
+      width: 28px; height: 28px; border-radius: 50%; border: 2px solid transparent;
+      cursor: pointer; transition: border-color 0.2s;
+    }
+    .color-btn.active, .color-btn:hover { border-color: var(--black); }
+
+    .qty-wrap { display: flex; align-items: center; gap: 0; margin-bottom: 24px; border: 1px solid var(--gray-mid); width: fit-content; }
+    .qty-btn { width: 44px; height: 44px; background: none; border: none; font-size: 18px; cursor: pointer; transition: background 0.2s; }
+    .qty-btn:hover { background: var(--gray-light); }
+    .qty-num { width: 60px; text-align: center; font-size: 15px; border: none; border-left: 1px solid var(--gray-mid); border-right: 1px solid var(--gray-mid); height: 44px; outline: none; font-family: var(--font-kr); }
+
+    .btn-group { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+    .btn-cart {
+      width: 100%; padding: 18px; background: var(--black); color: var(--white);
+      border: none; font-size: 13px; letter-spacing: 3px; text-transform: uppercase;
+      cursor: pointer; transition: opacity 0.2s; font-family: var(--font-kr);
+    }
+    .btn-cart:hover { opacity: 0.8; }
+    .btn-wish {
+      width: 100%; padding: 18px; background: none; color: var(--black);
+      border: 1px solid var(--black); font-size: 13px; letter-spacing: 3px; text-transform: uppercase;
+      cursor: pointer; transition: all 0.2s; font-family: var(--font-kr);
+    }
+    .btn-wish:hover { background: var(--gray-light); }
+
+    .product-meta { font-size: 12px; color: var(--gray-dark); line-height: 2.2; }
+    .product-meta span { color: var(--black); }
+
+    /* TABS */
+    .product-tabs { padding: 60px 48px; border-top: 1px solid var(--gray-mid); }
+    .tab-nav { display: flex; gap: 0; border-bottom: 1px solid var(--gray-mid); margin-bottom: 40px; }
+    .tab-nav-btn {
+      padding: 16px 32px; background: none; border: none;
+      font-size: 13px; letter-spacing: 2px; text-transform: uppercase;
+      cursor: pointer; color: var(--gray-dark); border-bottom: 2px solid transparent;
+      margin-bottom: -1px; transition: all 0.2s; font-family: var(--font-kr);
+    }
+    .tab-nav-btn.active { color: var(--black); border-bottom-color: var(--black); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .tab-content p { font-size: 14px; line-height: 2.2; color: #444; font-weight: 300; margin-bottom: 16px; }
+    .detail-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .detail-table td { padding: 12px 16px; border-bottom: 1px solid var(--gray-mid); }
+    .detail-table td:first-child { color: var(--gray-dark); width: 140px; letter-spacing: 1px; }
+
+    /* REVIEW */
+    .review-summary { display: flex; align-items: center; gap: 40px; margin-bottom: 32px; padding: 32px; background: var(--gray-light); }
+    .review-score { text-align: center; }
+    .review-score .score { font-family: var(--font-en); font-size: 64px; font-weight: 300; line-height: 1; }
+    .review-score .stars { font-size: 20px; }
+    .review-bars { flex: 1; }
+    .review-bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; font-size: 12px; color: var(--gray-dark); }
+    .bar-track { flex: 1; height: 4px; background: var(--gray-mid); }
+    .bar-fill { height: 100%; background: var(--black); }
+    .review-item { padding: 24px 0; border-bottom: 1px solid var(--gray-mid); }
+    .review-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+    .reviewer { font-size: 13px; font-weight: 500; }
+    .review-date { font-size: 12px; color: var(--gray-dark); }
+    .review-text { font-size: 14px; line-height: 1.8; color: #444; font-weight: 300; }
+
+    /* RELATED */
+    .related-section { padding: 60px 48px; background: var(--gray-light); }
+    .section-label { font-size: 11px; letter-spacing: 5px; text-transform: uppercase; color: var(--gray-dark); margin-bottom: 8px; font-family: var(--font-en); }
+    .section-title { font-family: var(--font-en); font-size: 36px; font-weight: 300; letter-spacing: 4px; margin-bottom: 32px; }
+    .related-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+    .related-card { cursor: pointer; }
+    .related-img { aspect-ratio: 3/4; background: var(--gray-mid); overflow: hidden; margin-bottom: 12px; }
+    .related-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+    .related-card:hover .related-img img { transform: scale(1.05); }
+    .related-name { font-size: 13px; margin-bottom: 4px; }
+    .related-price { font-family: var(--font-en); font-size: 15px; font-weight: 300; }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--black); color: var(--white); padding: 14px 32px; font-size: 13px; letter-spacing: 1px; z-index: 9999; transition: transform 0.3s ease; pointer-events: none; }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 1024px) {
+      .product-detail { grid-template-columns: 1fr; }
+      .product-info { border-left: none; border-top: 1px solid var(--gray-mid); position: static; }
+      .related-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      header { padding: 0 24px; }
+      nav { display: none; }
+      .breadcrumb, .product-images, .product-info, .product-tabs, .related-section { padding-left: 24px; padding-right: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="logo">LEEL</a>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="products.html">Collection</a>
+  </nav>
+  <div class="header-icons">
+    <a href="login.html" style="color:var(--black);text-decoration:none;font-size:13px;">로그인</a>
+    <button class="icon-btn" onclick="location.href='cart.html'">
+      🛍<span class="cart-badge" id="cartCount">0</span>
+    </button>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="index.html">Home</a><span>›</span>
+  <a href="products.html">Collection</a><span>›</span>
+  <span id="breadProduct">Product</span>
+</div>
+
+<div class="product-detail">
+  <!-- IMAGES -->
+  <div class="product-images">
+    <div class="main-img">
+      <img id="mainImg" src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&q=80" alt="Product"/>
+    </div>
+    <div class="img-thumbnails">
+      <div class="thumb active" onclick="changeImg(this, 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&q=80')">
+        <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&q=80" alt=""/>
+      </div>
+      <div class="thumb" onclick="changeImg(this, 'https://images.unsplash.com/photo-1485968579580-b6d095142e6e?w=400&q=80')">
+        <img src="https://images.unsplash.com/photo-1485968579580-b6d095142e6e?w=400&q=80" alt=""/>
+      </div>
+      <div class="thumb" onclick="changeImg(this, 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=400&q=80')">
+        <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?w=400&q=80" alt=""/>
+      </div>
+      <div class="thumb" onclick="changeImg(this, 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400&q=80')">
+        <img src="https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400&q=80" alt=""/>
+      </div>
+    </div>
+  </div>
+
+  <!-- INFO -->
+  <div class="product-info">
+    <p class="product-category-tag">Dress · Summer 2025</p>
+    <h1 class="product-title" id="productTitle">Minimal Linen Dress</h1>
+    <div class="product-price-wrap">
+      <span class="price-main" id="productPrice">₩89,000</span>
+    </div>
+    <div class="product-rating">
+      <span class="stars">★★★★★</span>
+      <span>4.8 (127 reviews)</span>
+    </div>
+
+    <div class="divider"></div>
+
+    <p class="option-label">
+      <span>Size</span>
+      <a href="#">사이즈 가이드</a>
+    </p>
+    <div class="size-options">
+      <button class="size-btn" onclick="selectSize(this)">XS</button>
+      <button class="size-btn active" onclick="selectSize(this)">S</button>
+      <button class="size-btn" onclick="selectSize(this)">M</button>
+      <button class="size-btn" onclick="selectSize(this)">L</button>
+      <button class="size-btn sold-out" disabled>XL</button>
+    </div>
+
+    <p class="option-label">Color</p>
+    <div class="color-options">
+      <div class="color-btn active" style="background:#0a0a0a;" title="Black" onclick="selectColor(this)"></div>
+      <div class="color-btn" style="background:#c9a96e;" title="Beige" onclick="selectColor(this)"></div>
+      <div class="color-btn" style="background:#e8d5c4;border:1px solid #ddd;" title="Cream" onclick="selectColor(this)"></div>
+    </div>
+
+    <p class="option-label">Quantity</p>
+    <div class="qty-wrap">
+      <button class="qty-btn" onclick="changeQty(-1)">−</button>
+      <input class="qty-num" type="number" id="qty" value="1" min="1" max="10"/>
+      <button class="qty-btn" onclick="changeQty(1)">+</button>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn-cart" onclick="addToCart()">Add to Cart</button>
+      <button class="btn-wish" onclick="toggleWishlist(this)">♡ Wishlist</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="product-meta">
+      <div>소재 <span>100% Linen</span></div>
+      <div>배송 <span>주문 후 2-3 영업일 이내</span></div>
+      <div>교환/반품 <span>수령 후 7일 이내</span></div>
+      <div>상품코드 <span>LEEL-DR-001</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="product-tabs">
+  <div class="tab-nav">
+    <button class="tab-nav-btn active" onclick="switchTab('detail', this)">상품 상세</button>
+    <button class="tab-nav-btn" onclick="switchTab('size', this)">사이즈 정보</button>
+    <button class="tab-nav-btn" onclick="switchTab('review', this)">리뷰 (127)</button>
+    <button class="tab-nav-btn" onclick="switchTab('shipping', this)">배송/교환</button>
+  </div>
+
+  <div class="tab-content active" id="tab-detail">
+    <p>르엘의 미니멀 리넨 드레스는 자연스러운 소재와 깔끔한 실루엣으로 일상의 우아함을 완성합니다. 100% 고급 리넨 소재로 제작되어 통기성이 뛰어나며, 여름철 착용하기 최적화된 디자인입니다.</p>
+    <p>A라인 실루엣과 미디 기장으로 다양한 체형에 잘 어울리며, 캐주얼부터 세미포멀까지 폭넓게 활용 가능합니다.</p>
+    <table class="detail-table">
+      <tr><td>소재</td><td>100% Linen</td></tr>
+      <tr><td>색상</td><td>Black, Beige, Cream</td></tr>
+      <tr><td>기장</td><td>미디 (약 110cm)</td></tr>
+      <tr><td>핏</td><td>A라인, 레귤러핏</td></tr>
+      <tr><td>세탁</td><td>손세탁 권장, 중성세제 사용</td></tr>
+      <tr><td>원산지</td><td>대한민국</td></tr>
+    </table>
+  </div>
+
+  <div class="tab-content" id="tab-size">
+    <table class="detail-table">
+      <tr><td>사이즈</td><td>가슴둘레</td><td>허리둘레</td><td>총장</td></tr>
+      <tr><td>XS</td><td>80cm</td><td>62cm</td><td>108cm</td></tr>
+      <tr><td>S</td><td>84cm</td><td>66cm</td><td>110cm</td></tr>
+      <tr><td>M</td><td>88cm</td><td>70cm</td><td>112cm</td></tr>
+      <tr><td>L</td><td>92cm</td><td>74cm</td><td>114cm</td></tr>
+    </table>
+  </div>
+
+  <div class="tab-content" id="tab-review">
+    <div class="review-summary">
+      <div class="review-score">
+        <div class="score">4.8</div>
+        <div class="stars">★★★★★</div>
+        <div style="font-size:12px;color:var(--gray-dark);margin-top:4px;">127 reviews</div>
+      </div>
+      <div class="review-bars">
+        <div class="review-bar-row"><span>5★</span><div class="bar-track"><div class="bar-fill" style="width:80%"></div></div><span>102</span></div>
+        <div class="review-bar-row"><span>4★</span><div class="bar-track"><div class="bar-fill" style="width:15%"></div></div><span>19</span></div>
+        <div class="review-bar-row"><span>3★</span><div class="bar-track"><div class="bar-fill" style="width:4%"></div></div><span>5</span></div>
+        <div class="review-bar-row"><span>2★</span><div class="bar-track"><div class="bar-fill" style="width:1%"></div></div><span>1</span></div>
+        <div class="review-bar-row"><span>1★</span><div class="bar-track"><div class="bar-fill" style="width:0%"></div></div><span>0</span></div>
+      </div>
+    </div>
+    <div class="review-item">
+      <div class="review-header"><span class="reviewer">김지은 ★★★★★</span><span class="review-date">2025.06.10</span></div>
+      <p class="review-text">소재가 정말 고급스럽고 착용감이 너무 좋아요. 사진보다 실물이 훨씬 예뻐서 깜짝 놀랐어요. 재구매 의사 100%입니다!</p>
+    </div>
+    <div class="review-item">
+      <div class="review-header"><span class="reviewer">박서연 ★★★★★</span><span class="review-date">2025.06.05</span></div>
+      <p class="review-text">르엘 제품은 항상 믿고 구매해요. 이번 리넨 드레스도 기대 이상이었습니다. 여름 내내 잘 입을 것 같아요.</p>
+    </div>
+    <div class="review-item">
+      <div class="review-header"><span class="reviewer">이하늘 ★★★★☆</span><span class="review-date">2025.05.28</span></div>
+      <p class="review-text">디자인은 정말 예쁜데 리넨 특성상 구김이 좀 있어요. 그래도 전체적으로 만족스럽습니다.</p>
+    </div>
+  </div>
+
+  <div class="tab-content" id="tab-shipping">
+    <table class="detail-table">
+      <tr><td>배송비</td><td>3,000원 (50,000원 이상 무료)</td></tr>
+      <tr><td>배송기간</td><td>주문 후 2-3 영업일</td></tr>
+      <tr><td>교환/반품</td><td>수령 후 7일 이내</td></tr>
+      <tr><td>교환/반품 불가</td><td>착용 후, 세탁 후, 태그 제거 후</td></tr>
+      <tr><td>고객센터</td><td>leel@leel.co.kr</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- RELATED -->
+<div class="related-section">
+  <p class="section-label">You May Also Like</p>
+  <h2 class="section-title">Related Items</h2>
+  <div class="related-grid" id="relatedGrid"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const products = [
+    { id:1, name:"Minimal Linen Dress", price:89000, img:"https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&q=80" },
+    { id:2, name:"Silk Wrap Blouse", price:65000, img:"https://images.unsplash.com/photo-1485968579580-b6d095142e6e?w=400&q=80" },
+    { id:3, name:"Wide Leg Trousers", price:72000, img:"https://images.unsplash.com/photo-1509631179647-0177331693ae?w=400&q=80" },
+    { id:4, name:"Cotton Knit Cardigan", price:58000, img:"https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400&q=80" },
+  ];
+
+  let cart = JSON.parse(localStorage.getItem('leel_cart') || '[]');
+  const urlParams = new URLSearchParams(window.location.search);
+  const refCode = urlParams.get('ref') || sessionStorage.getItem('leel_ref');
+  if (refCode) sessionStorage.setItem('leel_ref', refCode);
+
+  function updateCartBadge() {
+    document.getElementById('cartCount').textContent = cart.reduce((s,i)=>s+i.qty,0);
+  }
+  updateCartBadge();
+
+  function changeImg(thumb, src) {
+    document.getElementById('mainImg').src = src;
+    document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
+    thumb.classList.add('active');
+  }
+
+  function selectSize(btn) {
+    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function selectColor(btn) {
+    document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function changeQty(delta) {
+    const input = document.getElementById('qty');
+    const val = Math.max(1, Math.min(10, parseInt(input.value) + delta));
+    input.value = val;
+  }
+
+  function addToCart() {
+    const qty = parseInt(document.getElementById('qty').value);
+    const product = { id:1, name:"Minimal Linen Dress", price:89000, qty, ref: refCode || null };
+    const ex = cart.find(x => x.id === 1);
+    if (ex) ex.qty += qty; else cart.push(product);
+    localStorage.setItem('leel_cart', JSON.stringify(cart));
+    updateCartBadge();
+    showToast('장바구니에 담겼습니다');
+  }
+
+  function toggleWishlist(btn) {
+    const isLiked = btn.textContent.includes('♥');
+    btn.textContent = isLiked ? '♡ Wishlist' : '♥ Wishlist';
+    showToast(isLiked ? '위시리스트에서 제거되었습니다' : '위시리스트에 추가되었습니다');
+  }
+
+  function switchTab(tab, btn) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(`tab-${tab}`).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  // 연관 상품 렌더링
+  document.getElementById('relatedGrid').innerHTML = products.map(p => `
+    <div class="related-card" onclick="location.href='product.html?id=${p.id}'">
+      <div class="related-img"><img src="${p.img}" alt="${p.name}" loading="lazy"/></div>
+      <p class="related-name">${p.name}</p>
+      <p class="related-price">₩${p.price.toLocaleString()}</p>
+    </div>
+  `).join('');
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+</script>
+</body>
+</html>

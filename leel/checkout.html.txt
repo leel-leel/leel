@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Checkout — LEEL</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <!-- 토스페이먼츠 SDK -->
+  <script src="https://js.tosspayments.com/v1/payment"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --black: #0a0a0a; --white: #ffffff;
+      --gray-light: #f5f5f5; --gray-mid: #e0e0e0;
+      --gray-dark: #888888; --gold: #c9a96e;
+      --font-en: 'Cormorant Garamond', serif;
+      --font-kr: 'Noto Sans KR', sans-serif;
+    }
+    body { font-family: var(--font-kr); background: var(--gray-light); color: var(--black); }
+
+    header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 48px; height: 72px;
+      background: rgba(255,255,255,0.96); backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--gray-mid);
+    }
+    .logo { font-family: var(--font-en); font-size: 28px; font-weight: 600; letter-spacing: 6px; color: var(--black); text-decoration: none; }
+    .secure-badge { font-size: 12px; color: var(--gray-dark); letter-spacing: 1px; }
+
+    /* STEPS */
+    .steps-bar {
+      margin-top: 72px; background: var(--white);
+      padding: 20px 48px; border-bottom: 1px solid var(--gray-mid);
+      display: flex; align-items: center; justify-content: center; gap: 0;
+    }
+    .step { display: flex; align-items: center; gap: 10px; }
+    .step-num {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 1px solid var(--gray-mid); background: none;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; color: var(--gray-dark);
+    }
+    .step.active .step-num { background: var(--black); color: var(--white); border-color: var(--black); }
+    .step.done .step-num { background: var(--gold); color: var(--white); border-color: var(--gold); }
+    .step-label { font-size: 12px; letter-spacing: 1px; color: var(--gray-dark); }
+    .step.active .step-label { color: var(--black); font-weight: 500; }
+    .step-divider { width: 60px; height: 1px; background: var(--gray-mid); margin: 0 16px; }
+
+    /* LAYOUT */
+    .checkout-layout { display: grid; grid-template-columns: 1fr 400px; gap: 24px; padding: 32px 48px; max-width: 1200px; margin: 0 auto; }
+
+    /* FORM SECTIONS */
+    .form-section { background: var(--white); padding: 36px; margin-bottom: 16px; }
+    .section-title { font-family: var(--font-en); font-size: 20px; font-weight: 300; letter-spacing: 3px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--gray-mid); display: flex; align-items: center; gap: 12px; }
+    .section-num { width: 24px; height: 24px; background: var(--black); color: var(--white); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-grid.full { grid-template-columns: 1fr; }
+    .form-group { display: flex; flex-direction: column; gap: 8px; }
+    .form-group.span2 { grid-column: span 2; }
+    .form-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--gray-dark); }
+    .form-input {
+      padding: 14px 16px; border: 1px solid var(--gray-mid);
+      font-size: 14px; font-family: var(--font-kr); outline: none;
+      transition: border-color 0.2s; background: var(--white);
+    }
+    .form-input:focus { border-color: var(--black); }
+    .form-select { padding: 14px 16px; border: 1px solid var(--gray-mid); font-size: 14px; font-family: var(--font-kr); outline: none; background: var(--white); cursor: pointer; }
+
+    .addr-btn { padding: 14px 20px; background: var(--black); color: var(--white); border: none; font-size: 12px; letter-spacing: 1px; cursor: pointer; white-space: nowrap; font-family: var(--font-kr); }
+
+    /* 결제 수단 */
+    .payment-methods { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+    .pay-method {
+      padding: 16px 12px; border: 1px solid var(--gray-mid);
+      text-align: center; cursor: pointer; transition: all 0.2s;
+      font-size: 13px; letter-spacing: 0.5px;
+    }
+    .pay-method:hover { border-color: var(--black); }
+    .pay-method.active { border-color: var(--black); border-width: 2px; background: var(--gray-light); }
+    .pay-method .pay-icon { font-size: 24px; display: block; margin-bottom: 6px; }
+
+    .pay-detail { padding: 20px; background: var(--gray-light); display: none; }
+    .pay-detail.active { display: block; }
+    .card-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    /* ORDER SUMMARY */
+    .order-summary { background: var(--white); padding: 36px; position: sticky; top: 100px; height: fit-content; }
+    .summary-title { font-family: var(--font-en); font-size: 20px; font-weight: 300; letter-spacing: 3px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--gray-mid); }
+    .order-item { display: flex; gap: 12px; margin-bottom: 16px; align-items: center; }
+    .order-item-img { width: 56px; height: 70px; background: var(--gray-light); overflow: hidden; flex-shrink: 0; position: relative; }
+    .order-item-img img { width: 100%; height: 100%; object-fit: cover; }
+    .qty-circle { position: absolute; top: -6px; right: -6px; background: var(--black); color: var(--white); width: 18px; height: 18px; border-radius: 50%; font-size: 10px; display: flex; align-items: center; justify-content: center; }
+    .order-item-info { flex: 1; }
+    .order-item-name { font-size: 13px; margin-bottom: 3px; }
+    .order-item-opt { font-size: 11px; color: var(--gray-dark); }
+    .order-item-price { font-family: var(--font-en); font-size: 15px; font-weight: 300; }
+
+    .summary-divider { height: 1px; background: var(--gray-mid); margin: 16px 0; }
+    .summary-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 10px; }
+    .summary-row.total { font-size: 16px; font-weight: 500; padding-top: 12px; border-top: 1px solid var(--gray-mid); margin-top: 12px; }
+    .summary-label { color: var(--gray-dark); }
+    .summary-val { font-family: var(--font-en); }
+    .summary-row.total .summary-val { font-size: 22px; }
+
+    /* 셀러 수수료 안내 */
+    .ref-info { background: #0a0a0a; color: var(--gold); padding: 12px 16px; font-size: 11px; letter-spacing: 1px; margin-bottom: 16px; display: none; }
+    .ref-info span { color: rgba(255,255,255,0.5); display: block; font-size: 10px; margin-top: 2px; }
+
+    .btn-pay { width: 100%; padding: 20px; background: var(--black); color: var(--white); border: none; font-size: 14px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; font-family: var(--font-kr); transition: opacity 0.2s; margin-top: 20px; }
+    .btn-pay:hover { opacity: 0.85; }
+    .pay-notice { font-size: 11px; color: var(--gray-dark); text-align: center; margin-top: 12px; line-height: 2; }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--black); color: var(--white); padding: 14px 32px; font-size: 13px; z-index: 9999; transition: transform 0.3s; pointer-events: none; }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* SUCCESS MODAL */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; align-items: center; justify-content: center; }
+    .modal-overlay.active { display: flex; }
+    .modal { background: var(--white); width: 100%; max-width: 480px; padding: 60px 48px; text-align: center; animation: fadeUp 0.4s ease; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+    .success-icon { font-size: 48px; margin-bottom: 20px; }
+    .modal-title { font-family: var(--font-en); font-size: 28px; font-weight: 300; letter-spacing: 4px; margin-bottom: 12px; }
+    .modal-sub { font-size: 13px; color: var(--gray-dark); line-height: 2; margin-bottom: 32px; }
+    .order-num { font-family: var(--font-en); font-size: 18px; color: var(--gold); letter-spacing: 3px; margin-bottom: 32px; }
+    .modal-btn { display: inline-block; padding: 14px 40px; background: var(--black); color: var(--white); font-size: 12px; letter-spacing: 3px; text-transform: uppercase; text-decoration: none; cursor: pointer; border: none; font-family: var(--font-kr); }
+
+    @media (max-width: 1024px) {
+      .checkout-layout { grid-template-columns: 1fr; }
+      .order-summary { position: static; }
+    }
+    @media (max-width: 768px) {
+      header { padding: 0 24px; }
+      .checkout-layout { padding: 16px 24px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-group.span2 { grid-column: span 1; }
+      .payment-methods { grid-template-columns: repeat(2, 1fr); }
+      .steps-bar { padding: 16px 24px; }
+      .step-divider { width: 30px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="logo">LEEL</a>
+  <span class="secure-badge">🔒 Secure Checkout</span>
+</header>
+
+<!-- STEPS -->
+<div class="steps-bar">
+  <div class="step done">
+    <div class="step-num">✓</div>
+    <span class="step-label">Cart</span>
+  </div>
+  <div class="step-divider"></div>
+  <div class="step active">
+    <div class="step-num">2</div>
+    <span class="step-label">Checkout</span>
+  </div>
+  <div class="step-divider"></div>
+  <div class="step">
+    <div class="step-num">3</div>
+    <span class="step-label">Complete</span>
+  </div>
+</div>
+
+<div class="checkout-layout">
+  <!-- LEFT: FORMS -->
+  <div>
+    <!-- 배송 정보 -->
+    <div class="form-section">
+      <h2 class="section-title">
+        <span class="section-num">1</span> 배송 정보
+      </h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">이름</label>
+          <input class="form-input" type="text" id="fname" placeholder="홍길동"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">연락처</label>
+          <input class="form-input" type="tel" id="phone" placeholder="010-0000-0000"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">이메일</label>
+          <input class="form-input" type="email" id="email" placeholder="leel@email.com"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">우편번호</label>
+          <div style="display:flex;gap:8px;">
+            <input class="form-input" type="text" id="zipcode" placeholder="우편번호" style="flex:1"/>
+            <button class="addr-btn" onclick="searchAddr()">검색</button>
+          </div>
+        </div>
+        <div class="form-group span2">
+          <label class="form-label">기본 주소</label>
+          <input class="form-input" type="text" id="addr1" placeholder="기본 주소"/>
+        </div>
+        <div class="form-group span2">
+          <label class="form-label">상세 주소</label>
+          <input class="form-input" type="text" id="addr2" placeholder="상세 주소 (동, 호수 등)"/>
+        </div>
+        <div class="form-group span2">
+          <label class="form-label">배송 메모</label>
+          <select class="form-select" id="deliveryMemo">
+            <option>문 앞에 놓아주세요</option>
+            <option>경비실에 맡겨주세요</option>
+            <option>배송 전 연락 부탁드립니다</option>
+            <option>직접 입력</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 결제 수단 -->
+    <div class="form-section">
+      <h2 class="section-title">
+        <span class="section-num">2</span> 결제 수단
+      </h2>
+      <div class="payment-methods">
+        <div class="pay-method active" onclick="selectPay('card', this)">
+          <span class="pay-icon">💳</span>신용/체크카드
+        </div>
+        <div class="pay-method" onclick="selectPay('toss', this)">
+          <span class="pay-icon">📱</span>토스페이
+        </div>
+        <div class="pay-method" onclick="selectPay('kakao', this)">
+          <span class="pay-icon">💛</span>카카오페이
+        </div>
+        <div class="pay-method" onclick="selectPay('naver', this)">
+          <span class="pay-icon">🟢</span>네이버페이
+        </div>
+        <div class="pay-method" onclick="selectPay('bank', this)">
+          <span class="pay-icon">🏦</span>무통장입금
+        </div>
+        <div class="pay-method" onclick="selectPay('phone', this)">
+          <span class="pay-icon">📞</span>휴대폰결제
+        </div>
+      </div>
+
+      <!-- 카드 상세 -->
+      <div class="pay-detail active" id="detail-card">
+        <div class="card-row">
+          <div class="form-group">
+            <label class="form-label">카드사 선택</label>
+            <select class="form-select">
+              <option>신한카드</option><option>삼성카드</option>
+              <option>현대카드</option><option>KB국민카드</option>
+              <option>우리카드</option><option>하나카드</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">할부</label>
+            <select class="form-select">
+              <option>일시불</option><option>2개월</option>
+              <option>3개월</option><option>6개월</option>
+              <option>12개월</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- 무통장 상세 -->
+      <div class="pay-detail" id="detail-bank">
+        <p style="font-size:13px;line-height:2;color:var(--gray-dark);">
+          입금 계좌: <strong style="color:var(--black);">국민은행 123-456-789012</strong><br/>
+          예금주: <strong style="color:var(--black);">르엘(LEEL)</strong><br/>
+          주문 후 24시간 이내 미입금 시 자동 취소됩니다.
+        </p>
+      </div>
+
+      <!-- 간편결제 상세 -->
+      <div class="pay-detail" id="detail-toss">
+        <p style="font-size:13px;color:var(--gray-dark);line-height:2;">토스 앱 또는 토스페이로 간편하게 결제합니다.<br/>결제 버튼 클릭 시 토스페이먼츠로 연결됩니다.</p>
+      </div>
+      <div class="pay-detail" id="detail-kakao">
+        <p style="font-size:13px;color:var(--gray-dark);line-height:2;">카카오페이로 간편하게 결제합니다.<br/>카카오톡 앱이 실행됩니다.</p>
+      </div>
+      <div class="pay-detail" id="detail-naver">
+        <p style="font-size:13px;color:var(--gray-dark);line-height:2;">네이버페이로 간편하게 결제합니다.</p>
+      </div>
+      <div class="pay-detail" id="detail-phone">
+        <div class="form-group">
+          <label class="form-label">통신사</label>
+          <select class="form-select">
+            <option>SKT</option><option>KT</option><option>LG U+</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 약관 동의 -->
+    <div class="form-section">
+      <h2 class="section-title">
+        <span class="section-num">3</span> 약관 동의
+      </h2>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer;">
+          <input type="checkbox" id="agreeAll" onchange="toggleAll(this)" style="accent-color:var(--black);width:16px;height:16px;"/>
+          <strong>전체 동의</strong>
+        </label>
+        <hr style="border:none;border-top:1px solid var(--gray-mid);"/>
+        <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer;">
+          <input type="checkbox" class="agree-item" style="accent-color:var(--black);width:16px;height:16px;"/>
+          [필수] 구매조건 확인 및 결제 진행 동의
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer;">
+          <input type="checkbox" class="agree-item" style="accent-color:var(--black);width:16px;height:16px;"/>
+          [필수] 개인정보 수집 및 이용 동의
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer;">
+          <input type="checkbox" class="agree-item" style="accent-color:var(--black);width:16px;height:16px;"/>
+          [선택] 마케팅 정보 수신 동의
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: ORDER SUMMARY -->
+  <div class="order-summary">
+    <h2 class="summary-title">Order Summary</h2>
+
+    <!-- 셀러 레퍼럴 표시 -->
+    <div class="ref-info" id="refInfo">
+      🔗 셀러 링크 적용됨
+      <span id="refInfoCode"></span>
+    </div>
+
+    <div id="orderItemsWrap"></div>
+
+    <div class="summary-divider"></div>
+
+    <div class="summary-row">
+      <span class="summary-label">상품 금액</span>
+      <span class="summary-val" id="subtotalVal">₩0</span>
+    </div>
+    <div class="summary-row">
+      <span class="summary-label">배송비</span>
+      <span class="summary-val" id="shippingVal">₩3,000</span>
+    </div>
+    <div class="summary-row" id="sellerCommRow" style="display:none;">
+      <span class="summary-label">셀러 수수료 (20%)</span>
+      <span class="summary-val" id="sellerCommVal" style="color:var(--gold);">₩0</span>
+    </div>
+    <div class="summary-row total">
+      <span>총 결제금액</span>
+      <span class="summary-val" id="totalVal">₩0</span>
+    </div>
+
+    <button class="btn-pay" onclick="processPayment()">결제하기</button>
+    <p class="pay-notice">
+      위 내용을 확인하였으며 결제에 동의합니다.<br/>
+      🔒 SSL 보안 결제
+    </p>
+  </div>
+</div>
+
+<!-- SUCCESS MODAL -->
+<div class="modal-overlay" id="successModal">
+  <div class="modal">
+    <div class="success-icon">✅</div>
+    <h2 class="modal-title">Order Complete</h2>
+    <p class="modal-sub">주문이 성공적으로 완료되었습니다.<br/>주문 확인 이메일을 발송해 드렸습니다.</p>
+    <p class="order-num" id="orderNum">ORDER #LEEL-000000</p>
+    <button class="modal-btn" onclick="location.href='index.html'">쇼핑 계속하기</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let cart = JSON.parse(localStorage.getItem('leel_cart') || '[]');
+  const refCode = sessionStorage.getItem('leel_ref');
+  let selectedPay = 'card';
+
+  function init() {
+    renderOrderItems();
+    updateSummary();
+    showRefInfo();
+  }
+
+  function showRefInfo() {
+    if (refCode) {
+      const el = document.getElementById('refInfo');
+      el.style.display = 'block';
+      document.getElementById('refInfoCode').textContent = `셀러 ID: \${refCode}`;
+    }
+  }
+
+  function renderOrderItems() {
+    const imgs = [
+      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=200&q=80",
+      "https://images.unsplash.com/photo-1485968579580-b6d095142e6e?w=200&q=80",
+      "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=200&q=80",
+      "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=200&q=80",
+    ];
+    document.getElementById('orderItemsWrap').innerHTML = cart.map((item, i) => `
+      <div class="order-item">
+        <div class="order-item-img">
+          <img src="${imgs[i % imgs.length]}" alt="${item.name}"/>
+          <span class="qty-circle">${item.qty}</span>
+        </div>
+        <div class="order-item-info">
+          <p class="order-item-name">${item.name}</p>
+          <p class="order-item-opt">Size: S · Black</p>
+        </div>
+        <span class="order-item-price">₩${(item.price * item.qty).toLocaleString()}</span>
+      </div>
+    `).join('');
+  }
+
+  function updateSummary() {
+    const subtotal = cart.reduce((s,i) => s + i.price * i.qty, 0);
+    const shipping = subtotal >= 50000 ? 0 : 3000;
+    const total = subtotal + shipping;
+
+    document.getElementById('subtotalVal').textContent = `₩${subtotal.toLocaleString()}`;
+    document.getElementById('shippingVal').textContent = shipping === 0 ? '무료' : `₩${shipping.toLocaleString()}`;
+    document.getElementById('totalVal').textContent = `₩${total.toLocaleString()}`;
+
+    // 셀러 수수료 표시
+    if (refCode) {
+      const commission = Math.floor(subtotal * 0.2);
+      document.getElementById('sellerCommRow').style.display = 'flex';
+      document.getElementById('sellerCommVal').textContent = `₩${commission.toLocaleString()}`;
+    }
+  }
+
+  function selectPay(method, el) {
+    selectedPay = method;
+    document.querySelectorAll('.pay-method').forEach(m => m.classList.remove('active'));
+    document.querySelectorAll('.pay-detail').forEach(d => d.classList.remove('active'));
+    el.classList.add('active');
+    const detail = document.getElementById(`detail-${method}`);
+    if (detail) detail.classList.add('active');
+  }
+
+  function toggleAll(cb) {
+    document.querySelectorAll('.agree-item').forEach(item => item.checked = cb.checked);
+  }
+
+  function searchAddr() {
+    // 실제 서비스에서는 카카오 우편번호 API 연동
+    document.getElementById('zipcode').value = '06234';
+    document.getElementById('addr1').value = '서울특별시 강남구 테헤란로 123';
+    showToast('주소가 입력되었습니다 (데모)');
+  }
+
+  async function processPayment() {
+    // 필수 입력 검증
+    const name = document.getElementById('fname').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const addr1 = document.getElementById('addr1').value.trim();
+
+    if (!name || !phone || !email || !addr1) {
+      showToast('배송 정보를 모두 입력해주세요');
+      return;
+    }
+
+    const requiredChecks = document.querySelectorAll('.agree-item');
+    if (!requiredChecks[0].checked || !requiredChecks[1].checked) {
+      showToast('필수 약관에 동의해주세요');
+      return;
+    }
+
+    const subtotal = cart.reduce((s,i) => s + i.price * i.qty, 0);
+    const shipping = subtotal >= 50000 ? 0 : 3000;
+    const totalAmount = subtotal + shipping;
+    const orderNum = `LEEL-${Date.now()}`;
+
+    // 주문 데이터 저장 (레퍼럴 포함)
+    const orderData = {
+      orderNum,
+      items: cart,
+      total: totalAmount,
+      ref: refCode || null,
+      commission: refCode ? Math.floor(subtotal * 0.2) : 0,
+      buyer: { name, phone, email, addr: addr1 },
+      payMethod: selectedPay,
+      status: 'pending',
+      createdAt: new Date().toISOString()
+    };
+    const orders = JSON.parse(localStorage.getItem('leel_orders') || '[]');
+    orders.push(orderData);
+    localStorage.setItem('leel_orders', JSON.stringify(orders));
+
+    // 토스페이먼츠 연동 (실제 클라이언트 키 필요)
+    if (selectedPay === 'card' || selectedPay === 'toss') {
+      try {
+        const tossPayments = TossPayments('test_ck_YOUR_CLIENT_KEY');
+        await tossPayments.requestPayment('카드', {
+          amount: totalAmount,
+          orderId: orderNum,
+          orderName: `LEEL 주문 \${cart.length}건`,
+          customerName: name,
+          customerEmail: email,
+          successUrl: window.location.origin + '/order-success.html',
+          failUrl: window.location.origin + '/order-fail.html',
+        });
+      } catch (e) {
+        // 테스트 환경: 모달로 대체
+        showSuccessModal(orderNum);
+      }
+    } else {
+      showSuccessModal(orderNum);
+    }
+  }
+
+  function showSuccessModal(orderNum) {
+    localStorage.removeItem('leel_cart');
+    sessionStorage.removeItem('leel_ref');
+    document.getElementById('orderNum').textContent = `ORDER #${orderNum}`;
+    document.getElementById('successModal').classList.add('active');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  init();
+</script>
+</body>
+</html>

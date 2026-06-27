@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login — LEEL</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --black: #0a0a0a; --white: #ffffff;
+      --gray-light: #f5f5f5; --gray-mid: #e0e0e0;
+      --gray-dark: #888888; --gold: #c9a96e;
+      --font-en: 'Cormorant Garamond', serif;
+      --font-kr: 'Noto Sans KR', sans-serif;
+    }
+    body { font-family: var(--font-kr); background: var(--gray-light); color: var(--black); min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* HEADER */
+    header {
+      background: var(--white); border-bottom: 1px solid var(--gray-mid);
+      padding: 0 48px; height: 72px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo { font-family: var(--font-en); font-size: 28px; font-weight: 600; letter-spacing: 6px; color: var(--black); text-decoration: none; }
+    .back-link { font-size: 12px; letter-spacing: 1px; color: var(--gray-dark); text-decoration: none; }
+    .back-link:hover { color: var(--black); }
+
+    /* MAIN */
+    .auth-wrap {
+      flex: 1; display: grid; grid-template-columns: 1fr 1fr;
+      min-height: calc(100vh - 72px);
+    }
+
+    /* LEFT VISUAL */
+    .auth-visual {
+      background: var(--black);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 60px; position: relative; overflow: hidden;
+    }
+    .auth-visual::before {
+      content: 'LEEL';
+      position: absolute;
+      font-family: var(--font-en);
+      font-size: 200px; font-weight: 600;
+      color: rgba(255,255,255,0.03);
+      letter-spacing: 20px;
+      user-select: none;
+    }
+    .visual-content { position: relative; text-align: center; color: var(--white); }
+    .visual-logo { font-family: var(--font-en); font-size: 52px; font-weight: 300; letter-spacing: 12px; margin-bottom: 16px; }
+    .visual-sub { font-size: 12px; letter-spacing: 4px; text-transform: uppercase; color: var(--gold); margin-bottom: 40px; }
+    .visual-desc { font-size: 14px; line-height: 2.2; color: rgba(255,255,255,0.5); font-weight: 300; }
+    .visual-divider { width: 40px; height: 1px; background: var(--gold); margin: 32px auto; }
+    .visual-benefits { text-align: left; }
+    .benefit-item { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; color: rgba(255,255,255,0.7); font-size: 13px; }
+    .benefit-icon { color: var(--gold); font-size: 16px; }
+
+    /* RIGHT FORM */
+    .auth-form-wrap {
+      background: var(--white);
+      display: flex; align-items: center; justify-content: center;
+      padding: 60px 80px;
+    }
+    .auth-form { width: 100%; max-width: 400px; }
+
+    /* TABS */
+    .auth-tabs { display: flex; border-bottom: 2px solid var(--gray-mid); margin-bottom: 36px; }
+    .auth-tab {
+      flex: 1; padding: 14px; background: none; border: none;
+      font-size: 14px; letter-spacing: 1px; cursor: pointer;
+      color: var(--gray-dark); border-bottom: 2px solid transparent;
+      margin-bottom: -2px; transition: all 0.2s; font-family: var(--font-kr);
+    }
+    .auth-tab.active { color: var(--black); border-bottom-color: var(--black); font-weight: 500; }
+
+    .form-panel { display: none; }
+    .form-panel.active { display: block; }
+
+    .form-title { font-family: var(--font-en); font-size: 28px; font-weight: 300; letter-spacing: 4px; margin-bottom: 6px; }
+    .form-sub { font-size: 12px; color: var(--gray-dark); letter-spacing: 1px; margin-bottom: 28px; }
+
+    /* USER TYPE SELECTOR */
+    .type-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+    .type-card {
+      padding: 16px; border: 1px solid var(--gray-mid); cursor: pointer;
+      text-align: center; transition: all 0.2s; position: relative;
+    }
+    .type-card:hover { border-color: var(--black); }
+    .type-card.active { border-color: var(--black); border-width: 2px; background: var(--gray-light); }
+    .type-card .type-icon { font-size: 24px; display: block; margin-bottom: 6px; }
+    .type-card .type-name { font-size: 13px; font-weight: 500; display: block; margin-bottom: 2px; }
+    .type-card .type-desc { font-size: 11px; color: var(--gray-dark); }
+    .type-card .check { position: absolute; top: 8px; right: 8px; width: 16px; height: 16px; background: var(--black); border-radius: 50%; display: none; align-items: center; justify-content: center; }
+    .type-card.active .check { display: flex; }
+    .check::after { content: '✓'; color: var(--white); font-size: 9px; }
+
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--gray-dark); margin-bottom: 8px; }
+    .form-input {
+      width: 100%; padding: 14px 16px; border: 1px solid var(--gray-mid);
+      font-size: 14px; font-family: var(--font-kr); outline: none;
+      transition: border-color 0.2s; background: var(--white);
+    }
+    .form-input:focus { border-color: var(--black); }
+    .form-input.error { border-color: #c0392b; }
+    .error-msg { font-size: 11px; color: #c0392b; margin-top: 4px; display: none; }
+    .error-msg.show { display: block; }
+
+    .input-wrap { position: relative; }
+    .pw-toggle { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 14px; color: var(--gray-dark); }
+
+    /* 셀러 추가 필드 */
+    .seller-fields { background: var(--gray-light); padding: 16px; margin-bottom: 16px; border-left: 3px solid var(--gold); display: none; }
+    .seller-fields.show { display: block; }
+    .seller-fields-title { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 12px; }
+
+    .form-submit {
+      width: 100%; padding: 16px; background: var(--black); color: var(--white);
+      border: none; font-size: 13px; letter-spacing: 3px; text-transform: uppercase;
+      cursor: pointer; font-family: var(--font-kr); transition: opacity 0.2s; margin-top: 8px;
+    }
+    .form-submit:hover { opacity: 0.8; }
+    .form-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .divider-or { display: flex; align-items: center; gap: 16px; margin: 20px 0; }
+    .divider-or::before, .divider-or::after { content: ''; flex: 1; height: 1px; background: var(--gray-mid); }
+    .divider-or span { font-size: 11px; color: var(--gray-dark); letter-spacing: 2px; }
+
+    .social-btns { display: flex; flex-direction: column; gap: 10px; }
+    .social-btn {
+      width: 100%; padding: 13px; border: 1px solid var(--gray-mid);
+      background: none; font-size: 13px; cursor: pointer; display: flex;
+      align-items: center; justify-content: center; gap: 10px;
+      transition: background 0.2s; font-family: var(--font-kr);
+    }
+    .social-btn:hover { background: var(--gray-light); }
+    .social-btn.kakao { background: #FEE500; border-color: #FEE500; }
+    .social-btn.kakao:hover { background: #f0d800; }
+    .social-btn.naver { background: #03C75A; border-color: #03C75A; color: var(--white); }
+    .social-btn.naver:hover { background: #02b350; }
+
+    .form-note { font-size: 12px; color: var(--gray-dark); text-align: center; margin-top: 16px; line-height: 2; }
+    .form-note a { color: var(--black); }
+
+    /* 비밀번호 강도 */
+    .pw-strength { margin-top: 6px; }
+    .pw-strength-bar { height: 3px; background: var(--gray-mid); border-radius: 2px; overflow: hidden; margin-bottom: 4px; }
+    .pw-strength-fill { height: 100%; width: 0; transition: width 0.3s, background 0.3s; border-radius: 2px; }
+    .pw-strength-text { font-size: 10px; color: var(--gray-dark); letter-spacing: 1px; }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--black); color: var(--white); padding: 14px 32px; font-size: 13px; z-index: 9999; transition: transform 0.3s; pointer-events: none; }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 768px) {
+      .auth-wrap { grid-template-columns: 1fr; }
+      .auth-visual { display: none; }
+      .auth-form-wrap { padding: 40px 24px; }
+      header { padding: 0 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="logo">LEEL</a>
+  <a href="index.html" class="back-link">← 쇼핑 계속하기</a>
+</header>
+
+<div class="auth-wrap">
+  <!-- LEFT VISUAL -->
+  <div class="auth-visual">
+    <div class="visual-content">
+      <div class="visual-logo">LEEL</div>
+      <p class="visual-sub">르엘 멤버십</p>
+      <p class="visual-desc">르엘 회원이 되어<br/>특별한 혜택을 누리세요</p>
+      <div class="visual-divider"></div>
+      <div class="visual-benefits">
+        <div class="benefit-item"><span class="benefit-icon">✦</span>신상품 우선 알림</div>
+        <div class="benefit-item"><span class="benefit-icon">✦</span>회원 전용 할인 혜택</div>
+        <div class="benefit-item"><span class="benefit-icon">✦</span>주문 내역 관리</div>
+        <div class="benefit-item"><span class="benefit-icon">✦</span>셀러 수수료 20% 수익</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT FORM -->
+  <div class="auth-form-wrap">
+    <div class="auth-form">
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchTab('login')">로그인</button>
+        <button class="auth-tab" onclick="switchTab('signup')">회원가입</button>
+      </div>
+
+      <!-- ── 로그인 패널 ── -->
+      <div class="form-panel active" id="panel-login">
+        <h2 class="form-title">Welcome</h2>
+        <p class="form-sub">르엘에 오신 것을 환영합니다</p>
+
+        <div class="form-group">
+          <label class="form-label">이메일</label>
+          <input class="form-input" type="email" id="loginEmail" placeholder="이메일을 입력하세요"/>
+          <p class="error-msg" id="loginEmailErr">올바른 이메일을 입력해주세요</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">비밀번호</label>
+          <div class="input-wrap">
+            <input class="form-input" type="password" id="loginPw" placeholder="비밀번호를 입력하세요"/>
+            <button class="pw-toggle" onclick="togglePw('loginPw', this)">👁</button>
+          </div>
+          <p class="error-msg" id="loginPwErr">비밀번호를 입력해주세요</p>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+            <input type="checkbox" style="accent-color:var(--black);"/> 로그인 유지
+          </label>
+          <a href="#" style="font-size:12px;color:var(--gray-dark);">비밀번호 찾기</a>
+        </div>
+
+        <button class="form-submit" onclick="handleLogin()">로그인</button>
+
+        <div class="divider-or"><span>OR</span></div>
+
+        <div class="social-btns">
+          <button class="social-btn kakao" onclick="socialLogin('kakao')">
+            <span>💛</span> 카카오로 로그인
+          </button>
+          <button class="social-btn naver" onclick="socialLogin('naver')">
+            <span>N</span> 네이버로 로그인
+          </button>
+        </div>
+
+        <p class="form-note">
+          계정이 없으신가요?
+          <a href="#" onclick="switchTab('signup')">회원가입</a>
+        </p>
+      </div>
+
+      <!-- ── 회원가입 패널 ── -->
+      <div class="form-panel" id="panel-signup">
+        <h2 class="form-title">Join LEEL</h2>
+        <p class="form-sub">회원 유형을 선택해주세요</p>
+
+        <!-- 회원 유형 선택 -->
+        <div class="type-selector">
+          <div class="type-card active" onclick="selectType('customer', this)">
+            <span class="type-icon">🛍️</span>
+            <span class="type-name">일반 고객</span>
+            <span class="type-desc">쇼핑 & 혜택</span>
+            <div class="check"></div>
+          </div>
+          <div class="type-card" onclick="selectType('seller', this)">
+            <span class="type-icon">💼</span>
+            <span class="type-name">셀러</span>
+            <span class="type-desc">링크로 수익 창출</span>
+            <div class="check"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">이름</label>
+          <input class="form-input" type="text" id="signupName" placeholder="이름을 입력하세요"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">이메일</label>
+          <input class="form-input" type="email" id="signupEmail" placeholder="이메일을 입력하세요"/>
+          <p class="error-msg" id="signupEmailErr">올바른 이메일을 입력해주세요</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">비밀번호</label>
+          <div class="input-wrap">
+            <input class="form-input" type="password" id="signupPw" placeholder="8자 이상 입력하세요" oninput="checkPwStrength(this.value)"/>
+            <button class="pw-toggle" onclick="togglePw('signupPw', this)">👁</button>
+          </div>
+          <div class="pw-strength">
+            <div class="pw-strength-bar"><div class="pw-strength-fill" id="pwStrengthFill"></div></div>
+            <p class="pw-strength-text" id="pwStrengthText"></p>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">비밀번호 확인</label>
+          <input class="form-input" type="password" id="signupPwConfirm" placeholder="비밀번호를 다시 입력하세요"/>
+          <p class="error-msg" id="pwMatchErr">비밀번호가 일치하지 않습니다</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">연락처</label>
+          <input class="form-input" type="tel" id="signupPhone" placeholder="010-0000-0000"/>
+        </div>
+
+        <!-- 셀러 추가 필드 -->
+        <div class="seller-fields" id="sellerFields">
+          <p class="seller-fields-title">✦ 셀러 추가 정보</p>
+          <div class="form-group">
+            <label class="form-label">채널 유형</label>
+            <select class="form-input" id="channelType">
+              <option>인스타그램</option>
+              <option>유튜브</option>
+              <option>블로그</option>
+              <option>틱톡</option>
+              <option>기타</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">채널 URL</label>
+            <input class="form-input" type="text" id="channelUrl" placeholder="https://instagram.com/yourhandle"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">팔로워 수</label>
+            <select class="form-input" id="followerCount">
+              <option>1,000명 미만</option>
+              <option>1,000 ~ 10,000명</option>
+              <option>10,000 ~ 50,000명</option>
+              <option>50,000 ~ 100,000명</option>
+              <option>100,000명 이상</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">활동 소개</label>
+            <input class="form-input" type="text" id="sellerBio" placeholder="간단한 활동 소개를 입력해주세요"/>
+          </div>
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;margin-bottom:8px;">
+            <input type="checkbox" id="agreeAll" onchange="toggleAgree(this)" style="accent-color:var(--black);width:15px;height:15px;"/>
+            <strong>전체 동의</strong>
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--gray-dark);cursor:pointer;margin-bottom:6px;">
+            <input type="checkbox" class="agree-item" style="accent-color:var(--black);width:14px;height:14px;"/>
+            [필수] 이용약관 동의 <a href="#" style="color:var(--black);margin-left:4px;">보기</a>
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--gray-dark);cursor:pointer;margin-bottom:6px;">
+            <input type="checkbox" class="agree-item" style="accent-color:var(--black);width:14px;height:14px;"/>
+            [필수] 개인정보 수집 및 이용 동의 <a href="#" style="color:var(--black);margin-left:4px;">보기</a>
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--gray-dark);cursor:pointer;">
+            <input type="checkbox" class="agree-item" style="accent-color:var(--black);width:14px;height:14px;"/>
+            [선택] 마케팅 정보 수신 동의
+          </label>
+        </div>
+
+        <button class="form-submit" onclick="handleSignup()">가입하기</button>
+
+        <p class="form-note">
+          이미 계정이 있으신가요?
+          <a href="#" onclick="switchTab('login')">로그인</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let currentType = 'customer';
+
+  // 탭 전환
+  function switchTab(tab) {
+    document.querySelectorAll('.auth-tab').forEach((t,i) => {
+      t.classList.toggle('active', (tab==='login'&&i===0)||(tab==='signup'&&i===1));
+    });
+    document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(`panel-${tab}`).classList.add('active');
+  }
+
+  // 회원 유형 선택
+  function selectType(type, el) {
+    currentType = type;
+    document.querySelectorAll('.type-card').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('sellerFields').classList.toggle('show', type === 'seller');
+  }
+
+  // 비밀번호 표시 토글
+  function togglePw(id, btn) {
+    const input = document.getElementById(id);
+    if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈'; }
+    else { input.type = 'password'; btn.textContent = '👁'; }
+  }
+
+  // 비밀번호 강도 체크
+  function checkPwStrength(val) {
+    const fill = document.getElementById('pwStrengthFill');
+    const text = document.getElementById('pwStrengthText');
+    let score = 0;
+    if (val.length >= 8) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+    const levels = [
+      { w:'0%', c:'transparent', t:'' },
+      { w:'25%', c:'#e74c3c', t:'약함' },
+      { w:'50%', c:'#f39c12', t:'보통' },
+      { w:'75%', c:'#3498db', t:'강함' },
+      { w:'100%', c:'#27ae60', t:'매우 강함' },
+    ];
+    fill.style.width = levels[score].w;
+    fill.style.background = levels[score].c;
+    text.textContent = levels[score].t;
+    text.style.color = levels[score].c;
+  }
+
+  // 약관 전체 동의
+  function toggleAgree(cb) {
+    document.querySelectorAll('.agree-item').forEach(i => i.checked = cb.checked);
+  }
+
+  // 로그인 처리
+  function handleLogin() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const pw = document.getElementById('loginPw').value;
+    let valid = true;
+
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+      document.getElementById('loginEmail').classList.add('error');
+      document.getElementById('loginEmailErr').classList.add('show');
+      valid = false;
+    } else {
+      document.getElementById('loginEmail').classList.remove('error');
+      document.getElementById('loginEmailErr').classList.remove('show');
+    }
+
+    if (!pw) {
+      document.getElementById('loginPw').classList.add('error');
+      document.getElementById('loginPwErr').classList.add('show');
+      valid = false;
+    } else {
+      document.getElementById('loginPw').classList.remove('error');
+      document.getElementById('loginPwErr').classList.remove('show');
+    }
+
+    if (!valid) return;
+
+    // 관리자 계정 체크
+    if (email === 'admin@leel.co.kr' && pw === 'admin1234') {
+      localStorage.setItem('leel_user', JSON.stringify({ email, role: 'admin', name: '관리자' }));
+      showToast('관리자로 로그인되었습니다');
+      setTimeout(() => location.href = 'admin.html', 1000);
+      return;
+    }
+
+    // 저장된 유저 체크
+    const users = JSON.parse(localStorage.getItem('leel_users') || '[]');
+    const user = users.find(u => u.email === email && u.pw === pw);
+
+    if (user) {
+      localStorage.setItem('leel_user', JSON.stringify(user));
+      showToast(`환영합니다, \${user.name}님!`);
+      setTimeout(() => {
+        if (user.role === 'seller') location.href = 'seller.html';
+        else location.href = 'index.html';
+      }, 1000);
+    } else {
+      showToast('이메일 또는 비밀번호가 올바르지 않습니다');
+    }
+  }
+
+  // 회원가입 처리
+  function handleSignup() {
+    const name = document.getElementById('signupName').value.trim();
+    const email = document.getElementById('signupEmail').value.trim();
+    const pw = document.getElementById('signupPw').value;
+    const pwConfirm = document.getElementById('signupPwConfirm').value;
+    const phone = document.getElementById('signupPhone').value.trim();
+
+    if (!name || !email || !pw || !phone) { showToast('모든 필수 항목을 입력해주세요'); return; }
+    if (!/\S+@\S+\.\S+/.test(email)) { showToast('올바른 이메일을 입력해주세요'); return; }
+    if (pw.length < 8) { showToast('비밀번호는 8자 이상이어야 합니다'); return; }
+    if (pw !== pwConfirm) {
+      document.getElementById('pwMatchErr').classList.add('show');
+      return;
+    }
+    document.getElementById('pwMatchErr').classList.remove('show');
+
+    const requiredAgree = document.querySelectorAll('.agree-item');
+    if (!requiredAgree[0].checked || !requiredAgree[1].checked) {
+      showToast('필수 약관에 동의해주세요'); return;
+    }
+
+    // 셀러 ID 생성
+    const sellerId = currentType === 'seller'
+      ? 'seller_' + name.replace(/\s/g,'').toLowerCase() + '_' + Date.now().toString().slice(-4)
+      : null;
+
+    const newUser = {
+      name, email, pw, phone,
+      role: currentType,
+      sellerId,
+      channelType: currentType === 'seller' ? document.getElementById('channelType').value : null,
+      channelUrl: currentType === 'seller' ? document.getElementById('channelUrl').value : null,
+      followerCount: currentType === 'seller' ? document.getElementById('followerCount').value : null,
+      status: currentType === 'seller' ? 'pending' : 'active',
+      commission: 20,
+      totalSales: 0,
+      totalCommission: 0,
+      joinedAt: new Date().toISOString()
+    };
+
+    const users = JSON.parse(localStorage.getItem('leel_users') || '[]');
+    if (users.find(u => u.email === email)) { showToast('이미 사용 중인 이메일입니다'); return; }
+    users.push(newUser);
+    localStorage.setItem('leel_users', JSON.stringify(users));
+    localStorage.setItem('leel_user', JSON.stringify(newUser));
+
+    if (currentType === 'seller') {
+      showToast('셀러 신청 완료! 승인 후 링크가 발급됩니다');
+      setTimeout(() => location.href = 'seller.html', 1200);
+    } else {
+      showToast('회원가입이 완료되었습니다!');
+      setTimeout(() => location.href = 'index.html', 1200);
+    }
+  }
+
+  function socialLogin(provider) {
+    showToast(`${provider === 'kakao' ? '카카오' : '네이버'} 로그인 연동 준비 중입니다`);
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+</script>
+</body>
+</html>

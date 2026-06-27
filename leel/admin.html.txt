@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin — LEEL</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --black: #0a0a0a; --white: #ffffff;
+      --gray-light: #f5f5f5; --gray-mid: #e0e0e0;
+      --gray-dark: #888888; --gold: #c9a96e;
+      --font-en: 'Cormorant Garamond', serif;
+      --font-kr: 'Noto Sans KR', sans-serif;
+    }
+    body { font-family: var(--font-kr); background: #f0f0f0; color: var(--black); }
+
+    /* SIDEBAR */
+    .admin-wrap { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+    .sidebar {
+      background: #0a0a0a; color: var(--white);
+      position: fixed; top: 0; left: 0;
+      width: 260px; height: 100vh; overflow-y: auto;
+      display: flex; flex-direction: column;
+    }
+    .sidebar-logo {
+      padding: 28px; font-family: var(--font-en);
+      font-size: 22px; font-weight: 600; letter-spacing: 5px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: block; color: var(--white); text-decoration: none;
+    }
+    .sidebar-logo span { display: block; font-size: 10px; letter-spacing: 2px; color: var(--gold); margin-top: 4px; font-family: var(--font-kr); font-weight: 300; }
+
+    .admin-profile { padding: 20px 28px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 12px; }
+    .admin-avatar { width: 40px; height: 40px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    .admin-name { font-size: 13px; font-weight: 500; }
+    .admin-role { font-size: 10px; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; }
+
+    .sidebar-nav { padding: 12px 0; flex: 1; }
+    .nav-group-title { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.25); padding: 14px 28px 6px; }
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 28px; font-size: 13px; color: rgba(255,255,255,0.55);
+      cursor: pointer; transition: all 0.2s; text-decoration: none;
+      border-left: 3px solid transparent; position: relative;
+    }
+    .nav-item:hover { color: var(--white); background: rgba(255,255,255,0.04); }
+    .nav-item.active { color: var(--white); background: rgba(255,255,255,0.07); border-left-color: var(--gold); }
+    .nav-icon { font-size: 15px; width: 20px; text-align: center; }
+    .nav-badge { margin-left: auto; background: #e74c3c; color: var(--white); font-size: 10px; padding: 2px 7px; border-radius: 10px; }
+
+    .sidebar-bottom { padding: 20px 28px; border-top: 1px solid rgba(255,255,255,0.08); }
+    .logout-btn { font-size: 12px; color: rgba(255,255,255,0.35); cursor: pointer; background: none; border: none; font-family: var(--font-kr); letter-spacing: 1px; }
+    .logout-btn:hover { color: var(--white); }
+
+    /* MAIN */
+    .main-content { margin-left: 260px; padding: 36px; }
+
+    /* TOP BAR */
+    .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+    .page-title { font-family: var(--font-en); font-size: 30px; font-weight: 300; letter-spacing: 4px; }
+    .top-bar-right { display: flex; align-items: center; gap: 12px; }
+    .top-search { padding: 10px 16px; border: 1px solid var(--gray-mid); font-size: 13px; font-family: var(--font-kr); outline: none; width: 220px; background: var(--white); }
+    .top-search:focus { border-color: var(--black); }
+    .btn-sm { padding: 10px 20px; background: var(--black); color: var(--white); border: none; font-size: 12px; letter-spacing: 1px; cursor: pointer; font-family: var(--font-kr); }
+
+    /* STATS */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: var(--white); padding: 22px 24px; border-top: 3px solid transparent; }
+    .stat-card.gold { border-top-color: var(--gold); }
+    .stat-card.black { border-top-color: var(--black); }
+    .stat-card.green { border-top-color: #27ae60; }
+    .stat-card.red { border-top-color: #e74c3c; }
+    .stat-card.blue { border-top-color: #3498db; }
+    .stat-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--gray-dark); margin-bottom: 10px; }
+    .stat-value { font-family: var(--font-en); font-size: 28px; font-weight: 300; margin-bottom: 4px; }
+    .stat-sub { font-size: 11px; color: var(--gray-dark); }
+    .stat-sub.up { color: #27ae60; }
+    .stat-sub.down { color: #e74c3c; }
+
+    /* CARD */
+    .card { background: var(--white); padding: 24px; margin-bottom: 20px; }
+    .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--gray-mid); }
+    .card-title { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--black); }
+    .card-actions { display: flex; gap: 8px; }
+    .btn-xs { padding: 6px 14px; font-size: 11px; letter-spacing: 1px; border: 1px solid var(--gray-mid); background: none; cursor: pointer; font-family: var(--font-kr); transition: all 0.2s; }
+    .btn-xs:hover { border-color: var(--black); }
+    .btn-xs.primary { background: var(--black); color: var(--white); border-color: var(--black); }
+
+    /* TABLE */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .data-table th { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--gray-dark); padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--gray-mid); white-space: nowrap; }
+    .data-table td { padding: 14px; border-bottom: 1px solid var(--gray-light); vertical-align: middle; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: #fafafa; }
+    .data-table td:first-child { font-family: var(--font-en); font-size: 12px; }
+
+    /* BADGE */
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 10px; font-size: 10px; letter-spacing: 0.5px; white-space: nowrap; }
+    .badge-green { background: rgba(39,174,96,0.1); color: #27ae60; }
+    .badge-yellow { background: rgba(243,156,18,0.1); color: #f39c12; }
+    .badge-red { background: rgba(231,76,60,0.1); color: #e74c3c; }
+    .badge-blue { background: rgba(52,152,219,0.1); color: #3498db; }
+    .badge-gold { background: rgba(201,169,110,0.15); color: var(--gold); }
+    .badge-gray { background: var(--gray-light); color: var(--gray-dark); }
+
+    /* ACTION BTNS */
+    .action-btns { display: flex; gap: 6px; }
+    .act-btn { padding: 5px 12px; font-size: 11px; border: 1px solid var(--gray-mid); background: none; cursor: pointer; font-family: var(--font-kr); transition: all 0.2s; }
+    .act-btn:hover { border-color: var(--black); }
+    .act-btn.approve { border-color: #27ae60; color: #27ae60; }
+    .act-btn.approve:hover { background: #27ae60; color: var(--white); }
+    .act-btn.reject { border-color: #e74c3c; color: #e74c3c; }
+    .act-btn.reject:hover { background: #e74c3c; color: var(--white); }
+    .act-btn.danger { border-color: #e74c3c; color: #e74c3c; }
+
+    /* GRID */
+    .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-3col { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+
+    /* CHART */
+    .mini-chart { height: 160px; display: flex; align-items: flex-end; gap: 6px; }
+    .mini-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .mini-bar { width: 100%; border-radius: 2px 2px 0 0; background: var(--gray-light); transition: background 0.2s; cursor: pointer; }
+    .mini-bar:hover { background: var(--gold); }
+    .mini-bar.today { background: var(--black); }
+    .mini-label { font-size: 9px; color: var(--gray-dark); }
+
+    /* SELLER LINK GEN */
+    .link-gen-box { background: var(--gray-light); padding: 20px; margin-bottom: 16px; }
+    .link-gen-row { display: flex; gap: 8px; align-items: center; }
+    .link-gen-input { flex: 1; padding: 12px 16px; border: 1px solid var(--gray-mid); font-size: 13px; font-family: var(--font-kr); outline: none; background: var(--white); }
+    .link-gen-input:focus { border-color: var(--black); }
+    .link-result { margin-top: 12px; padding: 12px 16px; background: var(--white); border: 1px solid var(--gray-mid); font-size: 13px; color: var(--black); display: none; word-break: break-all; }
+    .link-result.show { display: block; }
+
+    /* COMMISSION SETTING */
+    .comm-setting { display: flex; align-items: center; gap: 16px; padding: 20px; background: var(--gray-light); margin-bottom: 16px; }
+    .comm-rate-input { width: 80px; padding: 12px; border: 1px solid var(--gray-mid); font-size: 18px; text-align: center; font-family: var(--font-en); outline: none; }
+    .comm-rate-input:focus { border-color: var(--black); }
+
+    /* MODAL */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; }
+    .modal-overlay.active { display: flex; }
+    .modal { background: var(--white); width: 100%; max-width: 500px; padding: 40px; position: relative; animation: fadeUp 0.3s ease; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+    .modal-close { position: absolute; top: 16px; right: 20px; background: none; border: none; font-size: 22px; cursor: pointer; color: var(--gray-dark); }
+    .modal-title { font-family: var(--font-en); font-size: 22px; font-weight: 300; letter-spacing: 3px; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--gray-mid); }
+    .modal-form-group { margin-bottom: 14px; }
+    .modal-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--gray-dark); display: block; margin-bottom: 6px; }
+    .modal-input { width: 100%; padding: 12px 14px; border: 1px solid var(--gray-mid); font-size: 13px; font-family: var(--font-kr); outline: none; }
+    .modal-input:focus { border-color: var(--black); }
+    .modal-btn { width: 100%; padding: 14px; background: var(--black); color: var(--white); border: none; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; font-family: var(--font-kr); margin-top: 8px; }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--black); color: var(--white); padding: 14px 32px; font-size: 13px; z-index: 9999; transition: transform 0.3s; pointer-events: none; }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* TABS */
+    .tab-bar { display: flex; border-bottom: 1px solid var(--gray-mid); margin-bottom: 20px; }
+    .tab-btn { padding: 10px 20px; background: none; border: none; font-size: 12px; letter-spacing: 1px; cursor: pointer; color: var(--gray-dark); border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.2s; font-family: var(--font-kr); }
+    .tab-btn.active { color: var(--black); border-bottom-color: var(--black); font-weight: 500; }
+
+    @media (max-width: 1200px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 1024px) {
+      .admin-wrap { grid-template-columns: 1fr; }
+      .sidebar { position: static; width: 100%; height: auto; }
+      .main-content { margin-left: 0; padding: 24px; }
+      .grid-2col, .grid-3col { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="admin-wrap">
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">LEEL <span>Admin Dashboard</span></a>
+
+    <div class="admin-profile">
+      <div class="admin-avatar">👑</div>
+      <div>
+        <p class="admin-name">관리자</p>
+        <p class="admin-role">Administrator</p>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <p class="nav-group-title">Overview</p>
+      <a class="nav-item active" onclick="showSection('dashboard', this)">
+        <span class="nav-icon">📊</span> 대시보드
+      </a>
+
+      <p class="nav-group-title">Management</p>
+      <a class="nav-item" onclick="showSection('orders', this)">
+        <span class="nav-icon">🛍️</span> 주문 관리
+        <span class="nav-badge" id="pendingOrderBadge">0</span>
+      </a>
+      <a class="nav-item" onclick="showSection('sellers', this)">
+        <span class="nav-icon">💼</span> 셀러 관리
+        <span class="nav-badge" id="pendingSellerBadge">0</span>
+      </a>
+      <a class="nav-item" onclick="showSection('users', this)">
+        <span class="nav-icon">👥</span> 회원 관리
+      </a>
+      <a class="nav-item" onclick="showSection('products', this)">
+        <span class="nav-icon">👗</span> 상품 관리
+      </a>
+      <a class="nav-item" onclick="showSection('commission', this)">
+        <span class="nav-icon">💰</span> 수수료 관리
+      </a>
+      <a class="nav-item" onclick="showSection('linkgen', this)">
+        <span class="nav-icon">🔗</span> 링크 생성
+      </a>
+
+      <p class="nav-group-title">Settings</p>
+      <a class="nav-item" onclick="showSection('settings', this)">
+        <span class="nav-icon">⚙️</span> 사이트 설정
+      </a>
+      <a class="nav-item" href="index.html">
+        <span class="nav-icon">🏠</span> 쇼핑몰 바로가기
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <button class="logout-btn" onclick="logout()">로그아웃 →</button>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <main class="main-content">
+
+    <!-- ══ 대시보드 ══ -->
+    <div id="section-dashboard">
+      <div class="top-bar">
+        <h1 class="page-title">Dashboard</h1>
+        <div class="top-bar-right">
+          <span style="font-size:12px;color:var(--gray-dark);" id="adminDate"></span>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card gold">
+          <p class="stat-label">총 매출</p>
+          <p class="stat-value" id="statRevenue">₩0</p>
+          <p class="stat-sub up" id="statRevenueSub">↑ 이번 달</p>
+        </div>
+        <div class="stat-card black">
+          <p class="stat-label">총 주문</p>
+          <p class="stat-value" id="statOrders">0</p>
+          <p class="stat-sub">누적 주문 수</p>
+        </div>
+        <div class="stat-card green">
+          <p class="stat-label">총 회원</p>
+          <p class="stat-value" id="statUsers">0</p>
+          <p class="stat-sub up">↑ 신규 가입</p>
+        </div>
+        <div class="stat-card blue">
+          <p class="stat-label">활성 셀러</p>
+          <p class="stat-value" id="statSellers">0</p>
+          <p class="stat-sub">승인된 셀러</p>
+        </div>
+        <div class="stat-card red">
+          <p class="stat-label">지급 수수료</p>
+          <p class="stat-value" id="statCommission">₩0</p>
+          <p class="stat-sub">셀러 수수료 합계</p>
+        </div>
+        <div class="stat-card gold">
+          <p class="stat-label">순 수익</p>
+          <p class="stat-value" id="statNetRevenue">₩0</p>
+          <p class="stat-sub up">수수료 제외</p>
+        </div>
+        <div class="stat-card blue">
+          <p class="stat-label">대기 주문</p>
+          <p class="stat-value" id="statPendingOrders">0</p>
+          <p class="stat-sub down">처리 필요</p>
+        </div>
+        <div class="stat-card red">
+          <p class="stat-label">승인 대기 셀러</p>
+          <p class="stat-value" id="statPendingSellers">0</p>
+          <p class="stat-sub down">검토 필요</p>
+        </div>
+      </div>
+
+      <!-- 차트 + 최근 주문 -->
+      <div class="grid-3col">
+        <div class="card">
+          <div class="card-header">
+            <p class="card-title">월별 매출 현황</p>
+            <div class="tab-bar" style="border:none;margin:0;">
+              <button class="tab-btn active">6개월</button>
+              <button class="tab-btn">1년</button>
+            </div>
+          </div>
+          <div class="mini-chart" id="adminChart"></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><p class="card-title">빠른 통계</p></div>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div style="display:flex;justify-content:space-between;font-size:13px;">
+              <span style="color:var(--gray-dark);">평균 주문금액</span>
+              <span style="font-family:var(--font-en);" id="avgOrder">₩0</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;">
+              <span style="color:var(--gray-dark);">셀러 전환율</span>
+              <span style="font-family:var(--font-en);" id="convRate">0%</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;">
+              <span style="color:var(--gray-dark);">수수료율</span>
+              <span style="font-family:var(--font-en);color:var(--gold);">20%</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;">
+              <span style="color:var(--gray-dark);">재구매율</span>
+              <span style="font-family:var(--font-en);">38%</span>
+            </div>
+            <hr style="border:none;border-top:1px solid var(--gray-mid);"/>
+            <div style="display:flex;justify-content:space-between;font-size:13px;">
+              <span style="color:var(--gray-dark);">오늘 방문자</span>
+              <span style="font-family:var(--font-en);" id="todayVisit">0</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;">
+              <span style="color:var(--gray-dark);">오늘 주문</span>
+              <span style="font-family:var(--font-en);" id="todayOrder">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 최근 주문 -->
+      <div class="card">
+        <div class="card-header">
+          <p class="card-title">최근 주문</p>
+          <button class="btn-xs" onclick="showSection('orders', null)">전체 보기</button>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>주문번호</th><th>구매자</th><th>상품</th>
+              <th>금액</th><th>셀러</th><th>수수료</th><th>상태</th><th>날짜</th>
+            </tr>
+          </thead>
+          <tbody id="recentOrdersBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ 주문 관리 ══ -->
+    <div id="section-orders" style="display:none;">
+      <div class="top-bar">
+        <h1 class="page-title">Orders</h1>
+        <div class="top-bar-right">
+          <input class="top-search" type="text" placeholder="주문번호, 구매자 검색..." oninput="filterOrders(this.value)"/>
+          <select class="top-search" style="width:130px;" onchange="filterOrderStatus(this.value)">
+            <option value="">전체 상태</option>
+            <option value="complete">완료</option>
+            <option value="pending">대기</option>
+            <option value="shipping">배송중</option>
+            <option value="cancel">취소</option>
+          </select>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <p class="card-title">전체 주문 내역</p>
+          <div class="card-actions">
+            <button class="btn-xs" onclick="exportCSV()">CSV 내보내기</button>
+          </div>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>주문번호</th><th>구매자</th><th>상품</th><th>수량</th>
+              <th>금액</th><th>셀러 ID</th><th>수수료</th><th>결제</th><th>상태</th><th>날짜</th><th>관리</th>
+            </tr>
+          </thead>
+          <tbody id="allOrdersBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ 셀러 관리 ══ -->
+    <div id="section-sellers" style="display:none;">
+      <div class="top-bar">
+        <h1 class="page-title">Sellers</h1>
+        <div class="top-bar-right">
+          <input class="top-search" type="text" placeholder="셀러 검색..." oninput="filterSellers(this.value)"/>
+          <button class="btn-sm" onclick="openModal('addSellerModal')">+ 셀러 추가</button>
+        </div>
+      </div>
+
+      <!-- 수수료 설정 -->
+      <div class="card">
+        <div class="card-header"><p class="card-title">수수료 설정</p></div>
+        <div class="comm-setting">
+          <div>
+            <p style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gray-dark);margin-bottom:6px;">기본 수수료율</p>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <input class="comm-rate-input" type="number" id="commRateInput" value="20" min="1" max="50"/>
+              <span style="font-size:20px;font-family:var(--font-en);">%</span>
+            </div>
+          </div>
+          <div style="flex:1;padding-left:24px;border-left:1px solid var(--gray-mid);">
+            <p style="font-size:13px;color:var(--gray-dark);line-height:2;">
+              현재 모든 셀러에게 <strong style="color:var(--black);">20%</strong> 수수료가 적용됩니다.<br/>
+              개별 셀러에게 다른 수수료율을 적용하려면 셀러 목록에서 수정하세요.
+            </p>
+          </div>
+          <button class="btn-sm" onclick="saveCommRate()">저장</button>
+        </div>
+
+        <!-- 링크 직접 생성 -->
+        <div class="card-header" style="margin-top:16px;"><p class="card-title">셀러 링크 직접 생성</p></div>
+        <div class="link-gen-box">
+          <div class="link-gen-row">
+            <input class="link-gen-input" type="text" id="sellerIdInput" placeholder="셀러 ID 또는 이름 입력 (예: seller_jieun)"/>
+            <button class="btn-sm" onclick="generateLink()">링크 생성</button>
+          </div>
+          <div class="link-result" id="linkResult">
+            <span id="generatedLink"></span>
+            <button onclick="copyGeneratedLink()" style="margin-left:12px;padding:4px 12px;background:var(--black);color:var(--white);border:none;font-size:11px;cursor:pointer;font-family:var(--font-kr);">복사</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 셀러 목록 -->
+      <div class="card">
+        <div class="card-header">
+          <p class="card-title">셀러 목록</p>
+          <div class="tab-bar" style="border:none;margin:0;">
+            <button class="tab-btn active" onclick="filterSellerTab('all', this)">전체</button>
+            <button class="tab-btn" onclick="filterSellerTab('active', this)">활성</button>
+            <button class="tab-btn" onclick="filterSellerTab('pending', this)">승인대기</button>
+          </div>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>셀러 ID</th><th>이름</th><th>채널</th><th>팔로워</th>
+              <th>수수료율</th><th>총 판매</th><th>수수료</th><th>상태</th><th>가입일</th><th>관리</th>
+            </tr>
+          </thead>
+          <tbody id="sellersBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ 회원 관리 ══ -->
+    <div id="section-users" style="display:none;">
+      <div class="top-bar">
+        <h1 class="page-title">Members</h1>
+        <input class="top-search" type="text" placeholder="회원 검색..." oninput="filterUsers(this.value)"/>
+      </div>
+      <div class="card">
+        <div class="card-header"><p class="card-title">전체 회원</p></div>
+        <table class="data-table">
+          <thead>
+            <tr><th>이름</th><th>이메일</th><th>유형</th><th>주문수</th><th>총 구매액</th><th>상태</th><th>가입일</th><th>관리</th></tr>
+          </thead>
+          <tbody id="usersBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ 상품 관리 ══ -->
+    <div id="section-products" style="display:none;">
+      <div class="top-bar">
+        <h1 class="page-title">Products</h1>
+        <button class="btn-sm" onclick="openModal('addProductModal')">+ 상품 추가</button>
+      </div>
+      <div class="card">
+        <div class="card-header"><p class="card-title">상품 목록</p></div>
+        <table class="data-table">
+          <thead>
+            <tr><th>ID</th><th>상품명</th><th>카테고리</th><th>가격</th><th>재고</th><th>판매수</th><th>상태</th><th>관리</th></tr>
+          </thead>
+          <tbody id="productsBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ 수수료 관리 ══ -->
+    <div id="section-commission" style="display:none;">
+      <div class="top-bar"><h1 class="page-title">Commission</h1></div>
+      <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px;">
+        <div class="stat-card gold"><p class="stat-label">총 수수료</p><p class="stat-value" id="commTotal">₩0</p></div>
+        <div class="stat-card green"><p class="stat-label">정산 완료</p><p class="stat-value" id="commPaid">₩0</p></div>
+        <div class="stat-card black"><p class="stat-label">정산 대기</p><p class="stat-value" id="commPending">₩0</p></div>
+        <div class="stat-card red"><p class="stat-label">출금 신청</p><p class="stat-value" id="commWithdraw">0건</p></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <p class="card-title">수수료 내역</p>
+          <button class="btn-xs primary" onclick="processAllComm()">전체 정산 처리</button>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr><th>셀러</th><th>주문번호</th><th>판매금액</th><th>수수료(20%)</th><th>정산상태</th><th>신청일</th><th>처리</th></tr>
+          </thead>
+          <tbody id="commBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ 링크 생성 ══ -->
+    <div id="section-linkgen" style="display:none;">
+      <div class="top-bar"><h1 class="page-title">Link Generator</h1></div>
+      <div class="card">
+        <div class="card-header"><p class="card-title">셀러 링크 생성기</p></div>
+        <div style="margin-bottom:24px;">
+          <p style="font-size:13px;color:var(--gray-dark);line-height:2;margin-bottom:20px;">
+            셀러에게 발급할 추천 링크를 생성합니다.<br/>
+            생성된 링크를 통해 구매 시 해당 셀러에게 <strong style="color:var(--black);">20%</strong> 수수료가 자동 적용됩니다.
+          </p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+            <div>
+              <label style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gray-dark);display:block;margin-bottom:8px;">셀러 선택</label>
+              <select class="link-gen-input" id="sellerSelect" style="width:100%;">
+                <option value="">셀러를 선택하세요</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gray-dark);display:block;margin-bottom:8px;">링크 유형</label>
+              <select class="link-gen-input" id="linkType" style="width:100%;">
+                <option value="main">메인 페이지</option>
+                <option value="products">전체 상품</option>
+                <option value="product1">Minimal Linen Dress</option>
+                <option value="product2">Silk Wrap Blouse</option>
+                <option value="product3">Wide Leg Trousers</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <input class="link-gen-input" type="text" id="customSellerId" placeholder="또는 셀러 ID 직접 입력" style="flex:1;"/>
+            <button class="btn-sm" onclick="generateAdminLink()">링크 생성</button>
+          </div>
+          <div class="link-result" id="adminLinkResult">
+            <div style="font-size:11px;color:var(--gray-dark);margin-bottom:6px;letter-spacing:1px;">생성된 링크</div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span id="adminGeneratedLink" style="flex:1;word-break:break-all;"></span>
+              <button onclick="copyAdminLink()" style="padding:6px 14px;background:var(--black);color:var(--white);border:none;font-size:11px;cursor:pointer;font-family:var(--font-kr);white-space:nowrap;">복사</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 생성 이력 -->
+        <div class="card-header"><p class="card-title">링크 생성 이력</p></div>
+        <table class="data-table">
+          <thead>
+            <tr><th>셀러</th><th>링크</th><th>클릭수</th><th>전환수</th><th>생성일</th><th>관리</th></tr>
+          </thead>
+          <tbody id="linkHistoryBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ 사이트 설정 ══ -->
+    <div id="section-settings" style="display:none;">
+      <div class="top-bar"><h1 class="page-title">Settings</h1></div>
+      <div class="grid-2col">
+        <div class="card">
+          <div class="card-header"><p class="card-title">기본 설정</p></div>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div class="modal-form-group">
+              <label class="modal-label">사이트명</label>
+              <input class="modal-input" type="text" value="LEEL — 르엘"/>
+            </div>
+            <div class="modal-form-group">
+              <label class="modal-label">기본 수수료율 (%)</label>
+              <input class="modal-input" type="number" value="20"/>
+            </div>
+            <div class="modal-form-group">
+              <label class="modal-label">무료배송 기준금액</label>
+              <input class="modal-input" type="number" value="50000"/>
+            </div>
+            <div class="modal-form-group">
+              <label class="modal-label">기본 배송비</label>
+              <input class="modal-input" type="number" value="3000"/>
+            </div>
+            <div class="modal-form-group">
+              <label class="modal-label">관리자 이메일</label>
+              <input class="modal-input" type="email" value="admin@leel.co.kr"/>
+            </div>
+            <button class="modal-btn" onclick="saveSettings()">설정 저장</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><p class="card-title">결제 설정</p></div>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div class="modal-form-group">
+              <label class="modal-label">토스페이먼츠 클라이언트 키</label>
+              <input class="modal-input" type="text" placeholder="test_ck_..."/>
+            </div>
+            <div class="modal-form-group">
+              <label class="modal-label">토스페이먼츠 시크릿 키</label>
+              <input class="modal-input" type="password" placeholder="test_sk_..."/>
+            </div>
+            <div class="modal-form-group">
+              <label class="modal-label">정산 주기</label>
+              <select class="modal-input">
+                <option>매주 월요일</option>
+                <option>매월 1일, 15일</option>
+                <option>매월 1일</option>
+              </select>
+            </div>
+            <div class="modal-form-group">
+              <label class="modal-label">최소 출금 금액</label>
+              <input class="modal-input" type="number" value="10000"/>
+            </div>
+            <button class="modal-btn" onclick="saveSettings()">저장</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ── 셀러 추가 모달 ── -->
+<div class="modal-overlay" id="addSellerModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('addSellerModal')">×</button>
+    <h2 class="modal-title">셀러 추가</h2>
+    <div class="modal-form-group">
+      <label class="modal-label">이름</label>
+      <input class="modal-input" type="text" id="newSellerName" placeholder="셀러 이름"/>
+    </div>
+    <div class="modal-form-group">
+      <label class="modal-label">이메일</label>
+      <input class="modal-input" type="email" id="newSellerEmail" placeholder="이메일"/>
+    </div>
+    <div class="modal-form-group">
+      <label class="modal-label">채널 유형</label>
+      <select class="modal-input" id="newSellerChannel">
+        <option>인스타그램</option><option>유튜브</option>
+        <option>블로그</option><option>틱톡</option><option>기타</option>
+      </select>
+    </div>
+    <div class="modal-form-group">
+      <label class="modal-label">수수료율 (%)</label>
+      <input class="modal-input" type="number" id="newSellerComm" value="20" min="1" max="50"/>
+    </div>
+    <button class="modal-btn" onclick="addSeller()">셀러 추가 & 링크 생성</button>
+  </div>
+</div>
+
+<!-- ── 상품 추가 모달 ── -->
+<div class="modal-overlay" id="addProductModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('addProductModal')">×</button>
+    <h2 class="modal-title">상품 추가</h2>
+    <div class="modal-form-group">
+      <label class="modal-label">상품명</label>
+      <input class="modal-input" type="text" id="newProductName" placeholder="상품명 입력"/>
+    </div>
+    <div class="modal-form-group">
+      <label class="modal-label">카테고리</label>
+      <select class="modal-input" id="newProductCat">
+        <option>dress</option><option>top</option>
+        <option>bottom</option><option>outer</option><option>acc</option>
+      </select>
+    </div>
+    <div class="modal-form-group">
+      <label class="modal-label">가격 (₩)</label>
+      <input class="modal-input" type="number" id="newProductPrice" placeholder="0"/>
+    </div>
+    <div class="modal-form-group">
+      <label class="modal-label">재고</label>
+      <input class="modal-input" type="number" id="newProductStock" placeholder="0"/>
+    </div>
+    <button class="modal-btn" onclick="addProduct()">상품 추가</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── 데이터 ──
+  const demoOrders = [
+    { id:'LEEL-001', buyer:'김지은', product:'Minimal Linen Dress', qty:1, amount:89000, ref:'seller_jieun_1234', commission:17800, pay:'카드', status:'complete', date:'2025.06.20' },
+    { id:'LEEL-002', buyer:'박서연', product:'Silk Wrap Blouse', qty:2, amount:130000, ref:'seller_minseo_5678', commission:26000, pay:'토스', status:'complete', date:'2025.06.19' },
+    { id:'LEEL-003', buyer:'이하늘', product:'Wide Leg Trousers', qty:1, amount:72000, ref:'seller_jieun_1234', commission:14400, pay:'카카오', status:'pending', date:'2025.06.18' },
+    { id:'LEEL-004', buyer:'최유나', product:'Pleated Midi Skirt', qty:1, amount:68000, ref:null, commission:0, pay:'카드', status:'shipping', date:'2025.06.17' },
+    { id:'LEEL-005', buyer:'정다은', product:'Oversized Blazer', qty:1, amount:128000, ref:'seller_minseo_5678', commission:25600, pay:'네이버', status:'cancel', date:'2025.06.15' },
+    { id:'LEEL-006', buyer:'홍길동', product:'Satin Slip Dress', qty:2, amount:224000, ref:'seller_jieun_1234', commission:44800, pay:'카드', status:'complete', date:'2025.06.14' },
+  ];
+
+  const demoSellers = [
+    { id:'seller_jieun_1234', name:'김지은', email:'jieun@email.com', channel:'인스타그램', followers:'50,000~100,000', comm:20, totalSales:383000, totalComm:76600, status:'active', joinedAt:'2025.05.01' },
+    { id:'seller_minseo_5678', name:'박민서', email:'minseo@email.com', channel:'유튜브', followers:'10,000~50,000', comm:20, totalSales:258000, totalComm:51600, status:'active', joinedAt:'2025.05.10' },
+    { id:'seller_harim_9012', name:'이하림', email:'harim@email.com', channel:'블로그', followers:'1,000~10,000', comm:15, totalSales:0, totalComm:0, status:'pending', joinedAt:'2025.06.20' },
+    { id:'seller_yuna_3456', name:'최유나', email:'yuna@email.com', channel:'틱톡', followers:'100,000+', comm:25, totalSales:0, totalComm:0, status:'pending', joinedAt:'2025.06.22' },
+  ];
+
+  const demoProducts = [
+    { id:1, name:'Minimal Linen Dress', cat:'dress', price:89000, stock:24, sold:48, status:'active' },
+    { id:2, name:'Silk Wrap Blouse', cat:'top', price:65000, stock:18, sold:62, status:'active' },
+    { id:3, name:'Wide Leg Trousers', cat:'bottom', price:72000, stock:30, sold:35, status:'active' },
+    { id:4, name:'Cotton Knit Cardigan', cat:'outer', price:58000, stock:0, sold:20, status:'soldout' },
+    { id:5, name:'Pleated Midi Skirt', cat:'bottom', price:68000, stock:12, sold:28, status:'active' },
+    { id:6, name:'Oversized Blazer', cat:'outer', price:128000, stock:8, sold:15, status:'active' },
+  ];
+
+  const linkHistory = [
+    { seller:'김지은', link:'leel.com/?ref=seller_jieun_1234', clicks:342, conv:28, date:'2025.05.01' },
+    { seller:'박민서', link:'leel.com/?ref=seller_minseo_5678', clicks:218, conv:16, date:'2025.05.10' },
+  ];
+
+  const chartData = [
+    { month:'1월', val:850000 }, { month:'2월', val:1200000 },
+    { month:'3월', val:980000 }, { month:'4월', val:1450000 },
+    { month:'5월', val:1680000 }, { month:'6월', val:2100000 },
+  ];
+
+  // ── 초기화 ──
+  function init() {
+    document.getElementById('adminDate').textContent = new Date().toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric' });
+
+    const users = JSON.parse(localStorage.getItem('leel_users') || '[]');
+    const orders = JSON.parse(localStorage.getItem('leel_orders') || []);
+    const allOrders = [...demoOrders, ...orders];
+    const allSellers = [...demoSellers, ...users.filter(u => u.role === 'seller')];
+    const activeSellers = allSellers.filter(s => s.status === 'active');
+    const pendingSellers = allSellers.filter(s => s.status === 'pending');
+
+    const totalRevenue = allOrders.filter(o => o.status !== 'cancel').reduce((s,i) => s + (i.amount || i.total || 0), 0);
+    const totalComm = allOrders.filter(o => o.ref && o.status !== 'cancel').reduce((s,i) => s + (i.commission || Math.floor((i.total||0)*0.2)), 0);
+
+    document.getElementById('statRevenue').textContent = `₩${totalRevenue.toLocaleString()}`;
+    document.getElementById('statOrders').textContent = allOrders.length;
+    document.getElementById('statUsers').textContent = users.length + 5;
+    document.getElementById('statSellers').textContent = activeSellers.length;
+    document.getElementById('statCommission').textContent = `₩${totalComm.toLocaleString()}`;
+    document.getElementById('statNetRevenue').textContent = `₩${(totalRevenue - totalComm).toLocaleString()}`;
+    document.getElementById('statPendingOrders').textContent = allOrders.filter(o => o.status === 'pending').length;
+    document.getElementById('statPendingSellers').textContent = pendingSellers.length;
+    document.getElementById('avgOrder').textContent = allOrders.length ? `₩${Math.floor(totalRevenue/allOrders.length).toLocaleString()}` : '₩0';
+    document.getElementById('convRate').textContent = `${Math.floor((allOrders.length / 1200) * 100)}%`;
+    document.getElementById('todayVisit').textContent = Math.floor(Math.random()*200+80);
+    document.getElementById('todayOrder').textContent = Math.floor(Math.random()*10+2);
+
+    document.getElementById('pendingOrderBadge').textContent = allOrders.filter(o => o.status === 'pending').length;
+    document.getElementById('pendingSellerBadge').textContent = pendingSellers.length;
+
+    // 수수료 섹션
+    document.getElementById('commTotal').textContent = `₩${totalComm.toLocaleString()}`;
+    document.getElementById('commPaid').textContent = `₩${Math.floor(totalComm*0.6).toLocaleString()}`;
+    document.getElementById('commPending').textContent = `₩${Math.floor(totalComm*0.4).toLocaleString()}`;
+    document.getElementById('commWithdraw').textContent = `${pendingSellers.length}건`;
+
+    renderChart();
+    renderRecentOrders(allOrders);
+    renderAllOrders(allOrders);
+    renderSellers(allSellers);
+    renderUsers(users);
+    renderProducts();
+    renderCommission(allOrders);
+    renderLinkHistory();
+    populateSellerSelect(allSellers);
+  }
+
+  function renderChart() {
+    const max = Math.max(...chartData.map(d => d.val));
+    document.getElementById('adminChart').innerHTML = chartData.map((d,i) => `
+      <div class="mini-bar-wrap">
+        <div class="mini-bar \${i===chartData.length-1?'today':''}"
+          style="height:${Math.floor((d.val/max)*140)}px;"
+          title="${d.month}: ₩${d.val.toLocaleString()}"></div>
+        <div class="mini-label">${d.month}</div>
+      </div>
+    `).join('');
+  }
+
+  function renderRecentOrders(orders) {
+    document.getElementById('recentOrdersBody').innerHTML = orders.slice(0,5).map(o => `
+      <tr>
+        <td>${o.id || o.orderNum?.slice(-8)}</td>
+        <td>${o.buyer || o.buyer?.name || '고객'}</td>
+        <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${o.product || (o.items?.[0]?.name) || '-'}</td>
+        <td style="font-family:var(--font-en);">₩${(o.amount||o.total||0).toLocaleString()}</td>
+        <td style="font-size:11px;color:var(--gray-dark);">${o.ref || '-'}</td>
+        <td style="color:var(--gold);font-family:var(--font-en);">₩${(o.commission||0).toLocaleString()}</td>
+        <td><span class="badge \${statusBadge(o.status)}">${statusLabel(o.status)}</span></td>
+        <td style="font-size:11px;color:var(--gray-dark);">${o.date||o.createdAt?.slice(0,10)||'-'}</td>
+      </tr>
+    `).join('');
+  }
+
+  function renderAllOrders(orders) {
+    document.getElementById('allOrdersBody').innerHTML = orders.map(o => `
+      <tr>
+        <td>${o.id || o.orderNum?.slice(-10)}</td>
+        <td>${o.buyer || '고객'}</td>
+        <td>${o.product || (o.items?.[0]?.name)||'-'}</td>
+        <td>${o.qty||1}</td>
+        <td style="font-family:var(--font-en);">₩${(o.amount||o.total||0).toLocaleString()}</td>
+        <td style="font-size:11px;color:var(--gray-dark);">${o.ref||'-'}</td>
+        <td style="color:var(--gold);">₩${(o.commission||0).toLocaleString()}</td>
+        <td style="font-size:12px;">${o.pay||o.payMethod||'-'}</td>
+        <td><span class="badge \${statusBadge(o.status)}">${statusLabel(o.status)}</span></td>
+        <td style="font-size:11px;color:var(--gray-dark);">${o.date||o.createdAt?.slice(0,10)||'-'}</td>
+        <td>
+          <div class="action-btns">
+            <button class="act-btn" onclick="updateOrderStatus('${o.id||o.orderNum}')">상태변경</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function renderSellers(sellers) {
+    document.getElementById('sellersBody').innerHTML = sellers.map(s => `
+      <tr>
+        <td style="font-size:11px;">${s.id||s.sellerId||'-'}</td>
+        <td>${s.name}</td>
+        <td style="font-size:12px;">${s.channel||s.channelType||'-'}</td>
+        <td style="font-size:12px;">${s.followers||s.followerCount||'-'}</td>
+        <td><strong>${s.comm||s.commission||20}%</strong></td>
+        <td style="font-family:var(--font-en);">₩${(s.totalSales||0).toLocaleString()}</td>
+        <td style="color:var(--gold);font-family:var(--font-en);">₩${(s.totalComm||s.totalCommission||0).toLocaleString()}</td>
+        <td><span class="badge \${s.status==='active'?'badge-green':'badge-yellow'}">${s.status==='active'?'활성':'승인대기'}</span></td>
+        <td style="font-size:11px;color:var(--gray-dark);">${s.joinedAt?.slice(0,10)||'-'}</td>
+        <td>
+          <div class="action-btns">
+            \${s.status==='pending'?`
+              <button class="act-btn approve" onclick="approveSeller('${s.id||s.sellerId}')">승인</button>
+              <button class="act-btn reject" onclick="rejectSeller('${s.id||s.sellerId}')">거절</button>
+            `:`
+              <button class="act-btn" onclick="copySellerLink('${s.id||s.sellerId}')">링크복사</button>
+              <button class="act-btn danger" onclick="suspendSeller('${s.id||s.sellerId}')">정지</button>
+            `}
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function renderUsers(users) {
+    const demoUsers = [
+      { name:'김지은', email:'jieun@email.com', role:'customer', orders:5, total:320000, status:'active', joinedAt:'2025.04.01' },
+      { name:'박서연', email:'seoyeon@email.com', role:'customer', orders:3, total:185000, status:'active', joinedAt:'2025.04.15' },
+      { name:'이하늘', email:'haneul@email.com', role:'seller', orders:0, total:0, status:'active', joinedAt:'2025.05.01' },
+    ];
+    const allUsers = [...demoUsers, ...users.map(u => ({ ...u, orders:0, total:0 }))];
+    document.getElementById('usersBody').innerHTML = allUsers.map(u => `
+      <tr>
+        <td>${u.name}</td>
+        <td style="font-size:12px;">${u.email}</td>
+        <td><span class="badge \${u.role==='seller'?'badge-gold':'badge-blue'}">${u.role==='seller'?'셀러':'고객'}</span></td>
+        <td>${u.orders||0}</td>
+        <td style="font-family:var(--font-en);">₩${(u.total||0).toLocaleString()}</td>
+        <td><span class="badge \${u.status==='active'?'badge-green':'badge-gray'}">${u.status==='active'?'활성':'비활성'}</span></td>
+        <td style="font-size:11px;color:var(--gray-dark);">${u.joinedAt?.slice(0,10)||'-'}</td>
+        <td><button class="act-btn" onclick="showToast('회원 상세 준비 중')">상세</button></td>
+      </tr>
+    `).join('');
+  }
+
+  function renderProducts() {
+    document.getElementById('productsBody').innerHTML = demoProducts.map(p => `
+      <tr>
+        <td>${p.id}</td>
+        <td>${p.name}</td>
+        <td style="font-size:12px;">${p.cat}</td>
+        <td style="font-family:var(--font-en);">₩${p.price.toLocaleString()}</td>
+        <td>${p.stock === 0 ? '<span style="color:#e74c3c;">품절</span>' : p.stock}</td>
+        <td>${p.sold}</td>
+        <td><span class="badge \${p.status==='active'?'badge-green':'badge-red'}">${p.status==='active'?'판매중':'품절'}</span></td>
+        <td>
+          <div class="action-btns">
+            <button class="act-btn" onclick="showToast('상품 수정 준비 중')">수정</button>
+            <button class="act-btn danger" onclick="showToast('상품이 삭제되었습니다')">삭제</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function renderCommission(orders) {
+    document.getElementById('commBody').innerHTML = orders.filter(o => o.ref).map(o => `
+      <tr>
+        <td style="font-size:12px;">${o.ref||'-'}</td>
+        <td style="font-size:12px;">${o.id||o.orderNum?.slice(-10)||'-'}</td>
+        <td style="font-family:var(--font-en);">₩${(o.amount||o.total||0).toLocaleString()}</td>
+        <td style="color:var(--gold);font-family:var(--font-en);">₩${(o.commission||Math.floor((o.total||0)*0.2)).toLocaleString()}</td>
+        <td><span class="badge \${o.status==='complete'?'badge-green':'badge-yellow'}">${o.status==='complete'?'정산완료':'정산대기'}</span></td>
+        <td style="font-size:11px;color:var(--gray-dark);">${o.date||o.createdAt?.slice(0,10)||'-'}</td>
+        <td><button class="act-btn approve" onclick="processComm(this)">정산처리</button></td>
+      </tr>
+    `).join('');
+  }
+
+  function renderLinkHistory() {
+    document.getElementById('linkHistoryBody').innerHTML = linkHistory.map(l => `
+      <tr>
+        <td>${l.seller}</td>
+        <td style="font-size:11px;color:var(--gray-dark);">${l.link}</td>
+        <td>${l.clicks}</td>
+        <td>${l.conv}</td>
+        <td style="font-size:11px;color:var(--gray-dark);">${l.date}</td>
+        <td>
+          <div class="action-btns">
+            <button class="act-btn" onclick="copySellerLink('${l.link.split('ref=')[1]}')">복사</button>
+            <button class="act-btn danger" onclick="showToast('링크가 비활성화되었습니다')">비활성화</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function populateSellerSelect(sellers) {
+    const sel = document.getElementById('sellerSelect');
+    if (!sel) return;
+    sellers.filter(s => s.status === 'active').forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s.id || s.sellerId;
+      opt.textContent = `${s.name} (${s.id||s.sellerId})`;
+      sel.appendChild(opt);
+    });
+  }
+
+  // ── 기능 함수 ──
+  function showSection(name, el) {
+    document.querySelectorAll('[id^="section-"]').forEach(s => s.style.display = 'none');
+    document.getElementById(`section-${name}`).style.display = 'block';
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    if (el) el.classList.add('active');
+  }
+
+  function statusBadge(s) {
+    return { complete:'badge-green', pending:'badge-yellow', shipping:'badge-blue', cancel:'badge-red' }[s] || 'badge-gray';
+  }
+  function statusLabel(s) {
+    return { complete:'완료', pending:'대기', shipping:'배송중', cancel:'취소' }[s] || s;
+  }
+
+  function generateLink() {
+    const id = document.getElementById('sellerIdInput').value.trim();
+    if (!id) { showToast('셀러 ID를 입력해주세요'); return; }
+    const link = `${window.location.origin}/index.html?ref=${id}`;
+    document.getElementById('generatedLink').textContent = link;
+    document.getElementById('linkResult').classList.add('show');
+  }
+
+  function generateAdminLink() {
+    const selId = document.getElementById('sellerSelect').value || document.getElementById('customSellerId').value.trim();
+    if (!selId) { showToast('셀러를 선택하거나 ID를 입력해주세요'); return; }
+    const type = document.getElementById('linkType').value;
+    const pages = { main:'index.html', products:'products.html', product1:'product.html?id=1', product2:'product.html?id=2', product3:'product.html?id=3' };
+    const link = `${window.location.origin}/${pages[type]}&ref=${selId}`.replace('?id=', '?id=').replace('&&', '&').replace('html&', 'html?');
+    const finalLink = `${window.location.origin}/${pages[type]}${pages[type].includes('?')?'&':'?'}ref=${selId}`;
+    document.getElementById('adminGeneratedLink').textContent = finalLink;
+    document.getElementById('adminLinkResult').classList.add('show');
+  }
+
+  function copyGeneratedLink() {
+    const link = document.getElementById('generatedLink').textContent;
+    navigator.clipboard.writeText(link).then(() => showToast('링크가 복사되었습니다!'));
+  }
+
+  function copyAdminLink() {
+    const link = document.getElementById('adminGeneratedLink').textContent;
+    navigator.clipboard.writeText(link).then(() => showToast('링크가 복사되었습니다!'));
+  }
+
+  function copySellerLink(sellerId) {
+    const link = `${window.location.origin}/index.html?ref=${sellerId}`;
+    navigator.clipboard.writeText(link).then(() => showToast('셀러 링크가 복사되었습니다!'));
+  }
+
+  function approveSeller(id) {
+    const users = JSON.parse(localStorage.getItem('leel_users') || '[]');
+    const u = users.find(u => u.sellerId === id);
+    if (u) { u.status = 'active'; localStorage.setItem('leel_users', JSON.stringify(users)); }
+    showToast(`셀러 \${id} 승인 완료! 링크가 활성화되었습니다`);
+    setTimeout(init, 500);
+  }
+
+  function rejectSeller(id) {
+    showToast(`셀러 \${id} 신청이 거절되었습니다`);
+  }
+
+  function suspendSeller(id) {
+    showToast(`셀러 \${id} 계정이 정지되었습니다`);
+  }
+
+  function updateOrderStatus(id) {
+    showToast(`주문 \${id} 상태가 변경되었습니다`);
+  }
+
+  function processComm(btn) {
+    btn.textContent = '완료';
+    btn.classList.remove('approve');
+    btn.classList.add('badge-gray');
+    btn.disabled = true;
+    showToast('정산이 처리되었습니다');
+  }
+
+  function processAllComm() {
+    showToast('전체 정산이 처리되었습니다');
+  }
+
+  function addSeller() {
+    const name = document.getElementById('newSellerName').value.trim();
+    const email = document.getElementById('newSellerEmail').value.trim();
+    const comm = document.getElementById('newSellerComm').value;
+    if (!name || !email) { showToast('이름과 이메일을 입력해주세요'); return; }
+    const sellerId = `seller_${name.replace(/\s/g,'').toLowerCase()}_${Date.now().toString().slice(-4)}`;
+    showToast(`셀러 추가 완료! ID: \${sellerId}`);
+    closeModal('addSellerModal');
+    setTimeout(init, 300);
+  }
+
+  function addProduct() {
+    const name = document.getElementById('newProductName').value.trim();
+    const price = document.getElementById('newProductPrice').value;
+    if (!name || !price) { showToast('상품명과 가격을 입력해주세요'); return; }
+    demoProducts.push({ id: demoProducts.length+1, name, cat: document.getElementById('newProductCat').value, price: parseInt(price), stock: parseInt(document.getElementById('newProductStock').value)||0, sold:0, status:'active' });
+    renderProducts();
+    showToast('상품이 추가되었습니다');
+    closeModal('addProductModal');
+  }
+
+  function saveCommRate() {
+    const rate = document.getElementById('commRateInput').value;
+    showToast(`수수료율이 \${rate}%로 저장되었습니다`);
+  }
+
+  function saveSettings() { showToast('설정이 저장되었습니다'); }
+
+  function filterOrders(q) {
+    const rows = document.querySelectorAll('#allOrdersBody tr');
+    rows.forEach(r => r.style.display = r.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none');
+  }
+
+  function filterOrderStatus(status) {
+    const rows = document.querySelectorAll('#allOrdersBody tr');
+    rows.forEach(r => r.style.display = (!status || r.textContent.includes(statusLabel(status))) ? '' : 'none');
+  }
+
+  function filterSellers(q) {
+    const rows = document.querySelectorAll('#sellersBody tr');
+    rows.forEach(r => r.style.display = r.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none');
+  }
+
+  function filterSellerTab(type, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const rows = document.querySelectorAll('#sellersBody tr');
+    rows.forEach(r => {
+      if (type === 'all') r.style.display = '';
+      else if (type === 'active') r.style.display = r.textContent.includes('활성') ? '' : 'none';
+      else if (type === 'pending') r.style.display = r.textContent.includes('승인대기') ? '' : 'none';
+    });
+  }
+
+  function filterUsers(q) {
+    const rows = document.querySelectorAll('#usersBody tr');
+    rows.forEach(r => r.style.display = r.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none');
+  }
+
+  function exportCSV() {
+    const rows = [['주문번호','구매자','상품','금액','셀러','수수료','상태','날짜']];
+    demoOrders.forEach(o => rows.push([o.id, o.buyer, o.product, o.amount, o.ref||'-', o.commission, o.status, o.date]));
+    const csv = rows.map(r => r.join(',')).join('\n');
+    const blob = new Blob(['\uFEFF'+csv], { type:'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'leel_orders.csv'; a.click();
+    showToast('CSV 파일이 다운로드됩니다');
+  }
+
+  function openModal(id) { document.getElementById(id).classList.add('active'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+  document.querySelectorAll('.modal-overlay').forEach(el => {
+    el.addEventListener('click', e => { if (e.target === el) el.classList.remove('active'); });
+  });
+
+  function logout() { localStorage.removeItem('leel_user'); location.href = 'login.html'; }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  init();
+</script>
+</body>
+</html>

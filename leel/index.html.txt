@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LEEL — 르엘</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #0a0a0a;
+      --white: #ffffff;
+      --gray-light: #f5f5f5;
+      --gray-mid: #e0e0e0;
+      --gray-dark: #888888;
+      --gold: #c9a96e;
+      --font-en: 'Cormorant Garamond', serif;
+      --font-kr: 'Noto Sans KR', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-kr);
+      background: var(--white);
+      color: var(--black);
+      overflow-x: hidden;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 48px;
+      height: 72px;
+      background: rgba(255,255,255,0.96);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--gray-mid);
+      transition: box-shadow 0.3s;
+    }
+    header.scrolled { box-shadow: 0 2px 20px rgba(0,0,0,0.08); }
+
+    .logo {
+      font-family: var(--font-en);
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: 6px;
+      color: var(--black);
+      text-decoration: none;
+    }
+
+    nav { display: flex; gap: 36px; }
+    nav a {
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--black);
+      text-decoration: none;
+      position: relative;
+      padding-bottom: 4px;
+    }
+    nav a::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 0; height: 1px;
+      background: var(--black);
+      transition: width 0.3s;
+    }
+    nav a:hover::after { width: 100%; }
+
+    .header-icons { display: flex; gap: 20px; align-items: center; }
+    .header-icons a {
+      color: var(--black);
+      text-decoration: none;
+      font-size: 13px;
+      letter-spacing: 1px;
+    }
+    .icon-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      color: var(--black);
+      position: relative;
+    }
+    .cart-badge {
+      position: absolute;
+      top: -6px; right: -8px;
+      background: var(--black);
+      color: var(--white);
+      font-size: 9px;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      margin-top: 72px;
+      height: calc(100vh - 72px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--black);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
+    }
+    .hero-content {
+      position: relative;
+      text-align: center;
+      color: var(--white);
+      z-index: 2;
+    }
+    .hero-sub {
+      font-size: 11px;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 24px;
+      font-family: var(--font-en);
+    }
+    .hero-title {
+      font-family: var(--font-en);
+      font-size: clamp(64px, 10vw, 120px);
+      font-weight: 300;
+      letter-spacing: 16px;
+      line-height: 1;
+      margin-bottom: 32px;
+    }
+    .hero-desc {
+      font-size: 14px;
+      font-weight: 300;
+      letter-spacing: 2px;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 48px;
+      line-height: 1.8;
+    }
+    .btn-primary {
+      display: inline-block;
+      padding: 16px 48px;
+      border: 1px solid var(--white);
+      color: var(--white);
+      font-size: 12px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: all 0.3s;
+      font-family: var(--font-kr);
+    }
+    .btn-primary:hover {
+      background: var(--white);
+      color: var(--black);
+    }
+    .btn-dark {
+      display: inline-block;
+      padding: 16px 48px;
+      background: var(--black);
+      border: 1px solid var(--black);
+      color: var(--white);
+      font-size: 12px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: all 0.3s;
+      cursor: pointer;
+      font-family: var(--font-kr);
+    }
+    .btn-dark:hover {
+      background: transparent;
+      color: var(--black);
+    }
+
+    /* ── MARQUEE ── */
+    .marquee-wrap {
+      overflow: hidden;
+      background: var(--black);
+      padding: 14px 0;
+      border-top: 1px solid #222;
+    }
+    .marquee-track {
+      display: flex;
+      gap: 60px;
+      animation: marquee 20s linear infinite;
+      white-space: nowrap;
+    }
+    .marquee-track span {
+      font-family: var(--font-en);
+      font-size: 12px;
+      letter-spacing: 4px;
+      color: var(--gold);
+      text-transform: uppercase;
+    }
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    /* ── SECTION COMMON ── */
+    section { padding: 100px 48px; }
+    .section-label {
+      font-size: 11px;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: var(--gray-dark);
+      margin-bottom: 16px;
+      font-family: var(--font-en);
+    }
+    .section-title {
+      font-family: var(--font-en);
+      font-size: clamp(32px, 4vw, 52px);
+      font-weight: 300;
+      letter-spacing: 4px;
+      margin-bottom: 48px;
+      line-height: 1.2;
+    }
+
+    /* ── NEW ARRIVALS ── */
+    .new-arrivals { background: var(--white); }
+    .section-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 48px;
+    }
+    .view-all {
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--black);
+      text-decoration: none;
+      border-bottom: 1px solid var(--black);
+      padding-bottom: 2px;
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+    .product-card {
+      cursor: pointer;
+      group: true;
+    }
+    .product-img-wrap {
+      position: relative;
+      overflow: hidden;
+      aspect-ratio: 3/4;
+      background: var(--gray-light);
+      margin-bottom: 16px;
+    }
+    .product-img-wrap img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s ease;
+    }
+    .product-card:hover .product-img-wrap img {
+      transform: scale(1.05);
+    }
+    .product-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.3);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 24px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .product-card:hover .product-overlay { opacity: 1; }
+    .overlay-btn {
+      padding: 12px 32px;
+      background: var(--white);
+      color: var(--black);
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .overlay-btn:hover { background: var(--black); color: var(--white); }
+
+    .product-badge {
+      position: absolute;
+      top: 12px; left: 12px;
+      background: var(--black);
+      color: var(--white);
+      font-size: 10px;
+      letter-spacing: 1px;
+      padding: 4px 10px;
+    }
+    .product-name {
+      font-size: 14px;
+      font-weight: 400;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .product-price {
+      font-family: var(--font-en);
+      font-size: 16px;
+      font-weight: 300;
+      color: var(--black);
+    }
+    .product-price .original {
+      text-decoration: line-through;
+      color: var(--gray-dark);
+      margin-right: 8px;
+      font-size: 14px;
+    }
+
+    /* ── BANNER ── */
+    .banner-section {
+      padding: 0;
+      background: var(--black);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 500px;
+    }
+    .banner-img {
+      background: #1a1a1a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-en);
+      font-size: 80px;
+      color: rgba(255,255,255,0.05);
+      letter-spacing: 8px;
+    }
+    .banner-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 80px;
+      color: var(--white);
+    }
+    .banner-content .section-label { color: var(--gold); }
+    .banner-content .section-title { color: var(--white); margin-bottom: 24px; }
+    .banner-desc {
+      font-size: 14px;
+      line-height: 2;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 40px;
+      font-weight: 300;
+    }
+
+    /* ── CATEGORIES ── */
+    .categories { background: var(--gray-light); }
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .category-card {
+      position: relative;
+      aspect-ratio: 4/5;
+      overflow: hidden;
+      cursor: pointer;
+      background: var(--gray-mid);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .category-card:first-child {
+      grid-row: span 2;
+      aspect-ratio: auto;
+    }
+    .category-bg {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%);
+      z-index: 1;
+    }
+    .category-label-wrap {
+      position: absolute;
+      bottom: 24px; left: 24px;
+      z-index: 2;
+      color: var(--white);
+    }
+    .category-label-wrap h3 {
+      font-family: var(--font-en);
+      font-size: 24px;
+      font-weight: 300;
+      letter-spacing: 3px;
+      margin-bottom: 4px;
+    }
+    .category-label-wrap span {
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: rgba(255,255,255,0.7);
+    }
+    .category-placeholder {
+      font-family: var(--font-en);
+      font-size: 48px;
+      color: rgba(0,0,0,0.08);
+      letter-spacing: 4px;
+    }
+
+    /* ── SELLER CTA ── */
+    .seller-cta {
+      background: var(--white);
+      text-align: center;
+      padding: 100px 48px;
+    }
+    .seller-cta .section-title { margin-bottom: 16px; }
+    .seller-cta p {
+      font-size: 15px;
+      color: var(--gray-dark);
+      line-height: 2;
+      margin-bottom: 40px;
+      font-weight: 300;
+    }
+    .seller-cta .highlight { color: var(--black); font-weight: 500; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--black);
+      color: var(--white);
+      padding: 80px 48px 40px;
+    }
+    .footer-top {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 48px;
+      margin-bottom: 60px;
+    }
+    .footer-brand .logo { color: var(--white); display: block; margin-bottom: 20px; }
+    .footer-brand p {
+      font-size: 13px;
+      line-height: 2;
+      color: rgba(255,255,255,0.4);
+      font-weight: 300;
+    }
+    .footer-col h4 {
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 20px;
+      font-family: var(--font-en);
+    }
+    .footer-col a {
+      display: block;
+      font-size: 13px;
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+      margin-bottom: 10px;
+      transition: color 0.2s;
+    }
+    .footer-col a:hover { color: var(--white); }
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer-bottom p {
+      font-size: 12px;
+      color: rgba(255,255,255,0.3);
+      letter-spacing: 1px;
+    }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: var(--white);
+      width: 100%;
+      max-width: 480px;
+      padding: 48px;
+      position: relative;
+      animation: fadeUp 0.3s ease;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .modal-close {
+      position: absolute;
+      top: 20px; right: 24px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--gray-dark);
+    }
+    .modal-title {
+      font-family: var(--font-en);
+      font-size: 28px;
+      font-weight: 300;
+      letter-spacing: 4px;
+      margin-bottom: 8px;
+    }
+    .modal-sub {
+      font-size: 12px;
+      color: var(--gray-dark);
+      letter-spacing: 1px;
+      margin-bottom: 32px;
+    }
+    .tab-group {
+      display: flex;
+      border-bottom: 1px solid var(--gray-mid);
+      margin-bottom: 28px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 12px;
+      background: none;
+      border: none;
+      font-size: 13px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      color: var(--gray-dark);
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      color: var(--black);
+      border-bottom-color: var(--black);
+      font-weight: 500;
+    }
+    .form-group { margin-bottom: 16px; }
+    .form-group label {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--gray-dark);
+      margin-bottom: 8px;
+    }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1px solid var(--gray-mid);
+      font-size: 14px;
+      font-family: var(--font-kr);
+      outline: none;
+      transition: border-color 0.2s;
+      background: var(--white);
+    }
+    .form-group input:focus, .form-group select:focus {
+      border-color: var(--black);
+    }
+    .form-submit {
+      width: 100%;
+      padding: 16px;
+      background: var(--black);
+      color: var(--white);
+      border: none;
+      font-size: 13px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      cursor: pointer;
+      margin-top: 8px;
+      font-family: var(--font-kr);
+      transition: opacity 0.2s;
+    }
+    .form-submit:hover { opacity: 0.8; }
+    .form-note {
+      font-size: 12px;
+      color: var(--gray-dark);
+      text-align: center;
+      margin-top: 16px;
+      line-height: 1.8;
+    }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--black);
+      color: var(--white);
+      padding: 14px 32px;
+      font-size: 13px;
+      letter-spacing: 1px;
+      z-index: 9999;
+      transition: transform 0.3s ease;
+      pointer-events: none;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1024px) {
+      .product-grid { grid-template-columns: repeat(2, 1fr); }
+      .footer-top { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+      header { padding: 0 24px; }
+      nav { display: none; }
+      section { padding: 60px 24px; }
+      .hero-title { letter-spacing: 8px; }
+      .product-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .category-grid { grid-template-columns: 1fr 1fr; }
+      .category-card:first-child { grid-column: span 2; grid-row: span 1; }
+      .banner-section { grid-template-columns: 1fr; }
+      .banner-img { display: none; }
+      .banner-content { padding: 60px 24px; }
+      .footer-top { grid-template-columns: 1fr; gap: 32px; }
+      .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+      .modal { padding: 32px 24px; margin: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header id="mainHeader">
+  <a href="index.html" class="logo">LEEL</a>
+  <nav>
+    <a href="#">New In</a>
+    <a href="#">Collection</a>
+    <a href="#">Tops</a>
+    <a href="#">Bottoms</a>
+    <a href="#">Dresses</a>
+    <a href="#">Sale</a>
+  </nav>
+  <div class="header-icons">
+    <a href="#" onclick="openModal('loginModal')">로그인</a>
+    <button class="icon-btn" onclick="openCart()">
+      🛍
+      <span class="cart-badge" id="cartCount">0</span>
+    </button>
+  </div>
+</header>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <p class="hero-sub">2025 Summer Collection</p>
+    <h1 class="hero-title">LEEL</h1>
+    <p class="hero-desc">
+      당신의 일상을 특별하게 만드는 옷<br/>
+      르엘이 함께합니다
+    </p>
+    <a href="#new-arrivals" class="btn-primary">Shop Now</a>
+  </div>
+</section>
+
+<!-- ── MARQUEE ── -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <span>New Arrivals</span><span>·</span>
+    <span>Summer 2025</span><span>·</span>
+    <span>Free Shipping</span><span>·</span>
+    <span>LEEL Collection</span><span>·</span>
+    <span>Minimal Luxury</span><span>·</span>
+    <span>New Arrivals</span><span>·</span>
+    <span>Summer 2025</span><span>·</span>
+    <span>Free Shipping</span><span>·</span>
+    <span>LEEL Collection</span><span>·</span>
+    <span>Minimal Luxury</span><span>·</span>
+  </div>
+</div>
+
+<!-- ── NEW ARRIVALS ── -->
+<section class="new-arrivals" id="new-arrivals">
+  <div class="section-header">
+    <div>
+      <p class="section-label">Just Arrived</p>
+      <h2 class="section-title">New Arrivals</h2>
+    </div>
+    <a href="products.html" class="view-all">View All</a>
+  </div>
+  <div class="product-grid" id="productGrid"></div>
+</section>
+
+<!-- ── BANNER ── -->
+<div class="banner-section">
+  <div class="banner-img">LEEL</div>
+  <div class="banner-content">
+    <p class="section-label">Summer 2025</p>
+    <h2 class="section-title">Effortless<br/>Elegance</h2>
+    <p class="banner-desc">
+      단순함 속에 깃든 우아함.<br/>
+      르엘의 여름 컬렉션을 만나보세요.
+    </p>
+    <a href="products.html" class="btn-primary">Explore Collection</a>
+  </div>
+</div>
+
+<!-- ── CATEGORIES ── -->
+<section class="categories">
+  <p class="section-label">Shop by Category</p>
+  <h2 class="section-title">Categories</h2>
+  <div class="category-grid">
+    <div class="category-card">
+      <div class="category-bg"></div>
+      <div class="category-placeholder">DRESS</div>
+      <div class="category-label-wrap">
+        <h3>Dresses</h3>
+        <span>32 Items</span>
+      </div>
+    </div>
+    <div class="category-card">
+      <div class="category-bg"></div>
+      <div class="category-placeholder">TOP</div>
+      <div class="category-label-wrap">
+        <h3>Tops</h3>
+        <span>48 Items</span>
+      </div>
+    </div>
+    <div class="category-card">
+      <div class="category-bg"></div>
+      <div class="category-placeholder">OUTER</div>
+      <div class="category-label-wrap">
+        <h3>Outer</h3>
+        <span>24 Items</span>
+      </div>
+    </div>
+    <div class="category-card">
+      <div class="category-bg"></div>
+      <div class="category-placeholder">BOTTOM</div>
+      <div class="category-label-wrap">
+        <h3>Bottoms</h3>
+        <span>36 Items</span>
+      </div>
+    </div>
+    <div class="category-card">
+      <div class="category-bg"></div>
+      <div class="category-placeholder">ACC</div>
+      <div class="category-label-wrap">
+        <h3>Accessories</h3>
+        <span>18 Items</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SELLER CTA ── -->
+<section class="seller-cta">
+  <p class="section-label">Partnership</p>
+  <h2 class="section-title">LEEL Seller</h2>
+  <p>
+    르엘 셀러가 되어 나만의 링크로 수익을 창출하세요.<br/>
+    판매금액의 <span class="highlight">20% 수수료</span>를 제공합니다.
+  </p>
+  <a href="#" class="btn-dark" onclick="openModal('loginModal')">셀러 신청하기</a>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <a href="index.html" class="logo">LEEL</a>
+      <p>르엘은 현대 여성의 라이프스타일을<br/>아름답게 표현하는 프리미엄 패션 브랜드입니다.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Shop</h4>
+      <a href="#">New Arrivals</a>
+      <a href="#">Collection</a>
+      <a href="#">Sale</a>
+      <a href="#">Lookbook</a>
+    </div>
+    <div class="footer-col">
+      <h4>Info</h4>
+      <a href="#">About LEEL</a>
+      <a href="#">Shipping</a>
+      <a href="#">Returns</a>
+      <a href="#">Size Guide</a>
+    </div>
+    <div class="footer-col">
+      <h4>Seller</h4>
+      <a href="#" onclick="openModal('loginModal')">셀러 로그인</a>
+      <a href="#">셀러 신청</a>
+      <a href="#">수수료 안내</a>
+      <a href="#">파트너십</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 LEEL. All rights reserved.</p>
+    <p>개인정보처리방침 · 이용약관</p>
+  </div>
+</footer>
+
+<!-- ── LOGIN/SIGNUP MODAL ── -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('loginModal')">×</button>
+    <h2 class="modal-title">LEEL</h2>
+    <p class="modal-sub">르엘에 오신 것을 환영합니다</p>
+    <div class="tab-group">
+      <button class="tab-btn active" onclick="switchTab('login')">로그인</button>
+      <button class="tab-btn" onclick="switchTab('signup')">회원가입</button>
+    </div>
+
+    <!-- 로그인 폼 -->
+    <div id="loginForm">
+      <div class="form-group">
+        <label>이메일</label>
+        <input type="email" placeholder="이메일을 입력하세요"/>
+      </div>
+      <div class="form-group">
+        <label>비밀번호</label>
+        <input type="password" placeholder="비밀번호를 입력하세요"/>
+      </div>
+      <button class="form-submit" onclick="handleLogin()">로그인</button>
+      <p class="form-note">비밀번호를 잊으셨나요? <a href="#" style="color:var(--black)">재설정</a></p>
+    </div>
+
+    <!-- 회원가입 폼 -->
+    <div id="signupForm" style="display:none">
+      <div class="form-group">
+        <label>회원 유형</label>
+        <select id="userType" onchange="toggleSellerFields()">
+          <option value="customer">일반 고객</option>
+          <option value="seller">셀러</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>이름</label>
+        <input type="text" placeholder="이름을 입력하세요"/>
+      </div>
+      <div class="form-group">
+        <label>이메일</label>
+        <input type="email" placeholder="이메일을 입력하세요"/>
+      </div>
+      <div class="form-group">
+        <label>비밀번호</label>
+        <input type="password" placeholder="비밀번호를 입력하세요"/>
+      </div>
+      <div id="sellerFields" style="display:none">
+        <div class="form-group">
+          <label>SNS / 채널 URL</label>
+          <input type="text" placeholder="인스타그램, 유튜브 등"/>
+        </div>
+        <div class="form-group">
+          <label>팔로워 수</label>
+          <input type="text" placeholder="예: 10,000"/>
+        </div>
+      </div>
+      <button class="form-submit" onclick="handleSignup()">가입하기</button>
+      <p class="form-note">가입 시 이용약관 및 개인정보처리방침에 동의합니다.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── 상품 데이터 ──
+  const products = [
+    { id: 1, name: "Minimal Linen Dress", price: 89000, badge: "New", category: "dress" },
+    { id: 2, name: "Silk Wrap Blouse", price: 65000, originalPrice: 82000, badge: "Sale", category: "top" },
+    { id: 3, name: "Wide Leg Trousers", price: 72000, badge: "New", category: "bottom" },
+    { id: 4, name: "Cotton Knit Cardigan", price: 58000, badge: null, category: "outer" },
+  ];
+
+  // ── 레퍼럴 추적 ──
+  const urlParams = new URLSearchParams(window.location.search);
+  const refCode = urlParams.get('ref');
+  if (refCode) {
+    sessionStorage.setItem('leel_ref', refCode);
+    console.log('Referral tracked:', refCode);
+  }
+
+  // ── 장바구니 ──
+  let cart = JSON.parse(localStorage.getItem('leel_cart') || '[]');
+  updateCartBadge();
+
+  function updateCartBadge() {
+    const total = cart.reduce((s, i) => s + i.qty, 0);
+    document.getElementById('cartCount').textContent = total;
+  }
+
+  function addToCart(productId) {
+    const product = products.find(p => p.id === productId);
+    const existing = cart.find(i => i.id === productId);
+    if (existing) existing.qty++;
+    else cart.push({ ...product, qty: 1 });
+    localStorage.setItem('leel_cart', JSON.stringify(cart));
+    updateCartBadge();
+    showToast(`${product.name} 장바구니에 담겼습니다`);
+  }
+
+  function openCart() {
+    showToast('장바구니 페이지로 이동합니다');
+  }
+
+  // ── 상품 렌더링 ──
+  function renderProducts() {
+    const grid = document.getElementById('productGrid');
+    grid.innerHTML = products.map(p => `
+      <div class="product-card" onclick="location.href='product.html?id=${p.id}'">
+        <div class="product-img-wrap">
+          <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&q=80" alt="${p.name}" loading="lazy"/>
+          \${p.badge ? `<span class="product-badge">${p.badge}</span>` : ''}
+          <div class="product-overlay">
+            <button class="overlay-btn" onclick="event.stopPropagation(); addToCart(${p.id})">Add to Cart</button>
+          </div>
+        </div>
+        <p class="product-name">${p.name}</p>
+        <p class="product-price">
+          \${p.originalPrice ? `<span class="original">₩${p.originalPrice.toLocaleString()}</span>` : ''}
+          ₩${p.price.toLocaleString()}
+        </p>
+      </div>
+    `).join('');
+  }
+  renderProducts();
+
+  // ── 헤더 스크롤 ──
+  window.addEventListener('scroll', () => {
+    document.getElementById('mainHeader').classList.toggle('scrolled', window.scrollY > 20);
+  });
+
+  // ── 모달 ──
+  function openModal(id) { document.getElementById(id).classList.add('active'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+  document.querySelectorAll('.modal-overlay').forEach(el => {
+    el.addEventListener('click', e => { if (e.target === el) el.classList.remove('active'); });
+  });
+
+  // ── 탭 전환 ──
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+      btn.classList.toggle('active', (tab === 'login' && i === 0) || (tab === 'signup' && i === 1));
+    });
+    document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+    document.getElementById('signupForm').style.display = tab === 'signup' ? 'block' : 'none';
+  }
+
+  function toggleSellerFields() {
+    const isSeller = document.getElementById('userType').value === 'seller';
+    document.getElementById('sellerFields').style.display = isSeller ? 'block' : 'none';
+  }
+
+  // ── 로그인/가입 핸들러 ──
+  function handleLogin() {
+    closeModal('loginModal');
+    showToast('로그인되었습니다. 환영합니다!');
+  }
+
+  function handleSignup() {
+    const type = document.getElementById('userType').value;
+    closeModal('loginModal');
+    if (type === 'seller') {
+      showToast('셀러 신청이 완료되었습니다. 승인 후 링크가 발급됩니다.');
+    } else {
+      showToast('회원가입이 완료되었습니다!');
+    }
+  }
+
+  // ── 토스트 ──
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+</script>
+</body>
+</html>

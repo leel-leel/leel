@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cart — LEEL</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --black: #0a0a0a; --white: #ffffff;
+      --gray-light: #f5f5f5; --gray-mid: #e0e0e0;
+      --gray-dark: #888888; --gold: #c9a96e;
+      --font-en: 'Cormorant Garamond', serif;
+      --font-kr: 'Noto Sans KR', sans-serif;
+    }
+    body { font-family: var(--font-kr); background: var(--white); color: var(--black); }
+
+    /* HEADER */
+    header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 48px; height: 72px;
+      background: rgba(255,255,255,0.96); backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--gray-mid);
+    }
+    .logo { font-family: var(--font-en); font-size: 28px; font-weight: 600; letter-spacing: 6px; color: var(--black); text-decoration: none; }
+    nav { display: flex; gap: 36px; }
+    nav a { font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: var(--black); text-decoration: none; }
+    .header-icons { display: flex; gap: 20px; align-items: center; }
+    .icon-btn { background: none; border: none; cursor: pointer; font-size: 18px; color: var(--black); position: relative; }
+    .cart-badge { position: absolute; top: -6px; right: -8px; background: var(--black); color: var(--white); font-size: 9px; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+    /* PAGE */
+    .page-wrap { margin-top: 72px; padding: 60px 48px; }
+    .page-title { font-family: var(--font-en); font-size: 42px; font-weight: 300; letter-spacing: 6px; margin-bottom: 8px; }
+    .page-sub { font-size: 13px; color: var(--gray-dark); letter-spacing: 1px; margin-bottom: 48px; }
+
+    /* CART LAYOUT */
+    .cart-layout { display: grid; grid-template-columns: 1fr 380px; gap: 48px; align-items: start; }
+
+    /* CART ITEMS */
+    .cart-items { border-top: 2px solid var(--black); }
+    .cart-header { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 40px; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--gray-mid); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--gray-dark); }
+    .cart-item { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 40px; gap: 16px; padding: 24px 0; border-bottom: 1px solid var(--gray-mid); align-items: center; }
+    .item-product { display: flex; gap: 16px; align-items: center; }
+    .item-img { width: 80px; height: 100px; background: var(--gray-light); overflow: hidden; flex-shrink: 0; }
+    .item-img img { width: 100%; height: 100%; object-fit: cover; }
+    .item-name { font-size: 14px; font-weight: 400; margin-bottom: 4px; }
+    .item-option { font-size: 12px; color: var(--gray-dark); letter-spacing: 0.5px; }
+    .item-price { font-family: var(--font-en); font-size: 16px; font-weight: 300; }
+    .item-qty { display: flex; align-items: center; border: 1px solid var(--gray-mid); width: fit-content; }
+    .qty-btn { width: 32px; height: 32px; background: none; border: none; cursor: pointer; font-size: 14px; transition: background 0.2s; }
+    .qty-btn:hover { background: var(--gray-light); }
+    .qty-num { width: 40px; text-align: center; font-size: 13px; border: none; border-left: 1px solid var(--gray-mid); border-right: 1px solid var(--gray-mid); height: 32px; outline: none; font-family: var(--font-kr); }
+    .item-total { font-family: var(--font-en); font-size: 16px; font-weight: 400; }
+    .item-remove { background: none; border: none; cursor: pointer; color: var(--gray-dark); font-size: 18px; transition: color 0.2s; }
+    .item-remove:hover { color: var(--black); }
+
+    /* EMPTY CART */
+    .empty-cart { text-align: center; padding: 80px 0; }
+    .empty-cart p { font-family: var(--font-en); font-size: 24px; font-weight: 300; letter-spacing: 3px; color: var(--gray-dark); margin-bottom: 24px; }
+    .btn-continue { display: inline-block; padding: 14px 40px; background: var(--black); color: var(--white); font-size: 12px; letter-spacing: 3px; text-transform: uppercase; text-decoration: none; transition: opacity 0.2s; }
+    .btn-continue:hover { opacity: 0.8; }
+
+    /* COUPON */
+    .coupon-wrap { display: flex; gap: 0; margin-top: 24px; }
+    .coupon-input { flex: 1; padding: 14px 16px; border: 1px solid var(--gray-mid); font-size: 13px; font-family: var(--font-kr); outline: none; }
+    .coupon-input:focus { border-color: var(--black); }
+    .coupon-btn { padding: 14px 24px; background: var(--black); color: var(--white); border: none; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; font-family: var(--font-kr); transition: opacity 0.2s; white-space: nowrap; }
+    .coupon-btn:hover { opacity: 0.8; }
+
+    /* ORDER SUMMARY */
+    .order-summary { background: var(--gray-light); padding: 36px; position: sticky; top: 100px; }
+    .summary-title { font-family: var(--font-en); font-size: 22px; font-weight: 300; letter-spacing: 3px; margin-bottom: 28px; padding-bottom: 16px; border-bottom: 1px solid var(--gray-mid); }
+    .summary-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 14px; }
+    .summary-row.total { font-size: 16px; font-weight: 500; padding-top: 16px; border-top: 1px solid var(--gray-mid); margin-top: 16px; }
+    .summary-row span:last-child { font-family: var(--font-en); font-size: 16px; }
+    .summary-row.total span:last-child { font-size: 22px; }
+    .summary-label { color: var(--gray-dark); font-size: 13px; }
+    .discount-val { color: #c0392b; }
+
+    /* 셀러 레퍼럴 배지 */
+    .ref-badge { background: var(--black); color: var(--gold); font-size: 11px; letter-spacing: 1px; padding: 8px 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+    .ref-badge span { font-size: 10px; color: rgba(255,255,255,0.6); }
+
+    .btn-checkout { width: 100%; padding: 18px; background: var(--black); color: var(--white); border: none; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; font-family: var(--font-kr); transition: opacity 0.2s; margin-top: 20px; }
+    .btn-checkout:hover { opacity: 0.8; }
+    .btn-continue-shop { width: 100%; padding: 14px; background: none; color: var(--black); border: 1px solid var(--gray-mid); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; font-family: var(--font-kr); transition: all 0.2s; margin-top: 10px; }
+    .btn-continue-shop:hover { border-color: var(--black); }
+
+    .secure-info { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 16px; font-size: 11px; color: var(--gray-dark); letter-spacing: 1px; }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--black); color: var(--white); padding: 14px 32px; font-size: 13px; z-index: 9999; transition: transform 0.3s; pointer-events: none; }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 1024px) {
+      .cart-layout { grid-template-columns: 1fr; }
+      .order-summary { position: static; }
+    }
+    @media (max-width: 768px) {
+      header { padding: 0 24px; }
+      nav { display: none; }
+      .page-wrap { padding: 40px 24px; }
+      .cart-header { display: none; }
+      .cart-item { grid-template-columns: 1fr; gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="logo">LEEL</a>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="products.html">Collection</a>
+  </nav>
+  <div class="header-icons">
+    <a href="login.html" style="color:var(--black);text-decoration:none;font-size:13px;">로그인</a>
+    <button class="icon-btn">🛍<span class="cart-badge" id="cartCount">0</span></button>
+  </div>
+</header>
+
+<div class="page-wrap">
+  <h1 class="page-title">Shopping Cart</h1>
+  <p class="page-sub" id="cartSubtitle">0개의 상품</p>
+
+  <div class="cart-layout">
+    <!-- ITEMS -->
+    <div>
+      <div class="cart-items">
+        <div class="cart-header">
+          <span>Product</span>
+          <span>Price</span>
+          <span>Quantity</span>
+          <span>Total</span>
+          <span></span>
+        </div>
+        <div id="cartItemsWrap"></div>
+      </div>
+
+      <!-- COUPON -->
+      <div class="coupon-wrap" style="margin-top:24px;">
+        <input class="coupon-input" type="text" id="couponInput" placeholder="쿠폰 코드를 입력하세요"/>
+        <button class="coupon-btn" onclick="applyCoupon()">적용</button>
+      </div>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="order-summary">
+      <h2 class="summary-title">Order Summary</h2>
+
+      <div id="refBadge" style="display:none;" class="ref-badge">
+        🔗 셀러 링크로 접속 <span id="refCodeDisplay"></span>
+      </div>
+
+      <div class="summary-row">
+        <span class="summary-label">상품 금액</span>
+        <span id="subtotalVal">₩0</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">배송비</span>
+        <span id="shippingVal">₩3,000</span>
+      </div>
+      <div class="summary-row" id="discountRow" style="display:none;">
+        <span class="summary-label">할인</span>
+        <span class="discount-val" id="discountVal">-₩0</span>
+      </div>
+      <div class="summary-row total">
+        <span>총 결제금액</span>
+        <span id="totalVal">₩0</span>
+      </div>
+
+      <button class="btn-checkout" onclick="location.href='checkout.html'">결제하기</button>
+      <button class="btn-continue-shop" onclick="location.href='products.html'">쇼핑 계속하기</button>
+      <div class="secure-info">🔒 안전한 결제 보장</div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let cart = JSON.parse(localStorage.getItem('leel_cart') || '[]');
+  const refCode = sessionStorage.getItem('leel_ref');
+  let discount = 0;
+
+  function init() {
+    renderCart();
+    updateSummary();
+    showRefBadge();
+    document.getElementById('cartCount').textContent = cart.reduce((s,i)=>s+i.qty,0);
+  }
+
+  function showRefBadge() {
+    if (refCode) {
+      document.getElementById('refBadge').style.display = 'flex';
+      document.getElementById('refCodeDisplay').textContent = `(${refCode})`;
+    }
+  }
+
+  function renderCart() {
+    const wrap = document.getElementById('cartItemsWrap');
+    document.getElementById('cartSubtitle').textContent = `${cart.reduce((s,i)=>s+i.qty,0)}개의 상품`;
+
+    if (cart.length === 0) {
+      wrap.innerHTML = `
+        <div class="empty-cart">
+          <p>장바구니가 비어있습니다</p>
+          <a href="products.html" class="btn-continue">쇼핑하러 가기</a>
+        </div>`;
+      return;
+    }
+
+    const imgs = [
+      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=200&q=80",
+      "https://images.unsplash.com/photo-1485968579580-b6d095142e6e?w=200&q=80",
+      "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=200&q=80",
+      "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=200&q=80",
+    ];
+
+    wrap.innerHTML = cart.map((item, idx) => `
+      <div class="cart-item" id="item-${item.id}">
+        <div class="item-product">
+          <div class="item-img">
+            <img src="${imgs[idx % imgs.length]}" alt="${item.name}"/>
+          </div>
+          <div>
+            <p class="item-name">${item.name}</p>
+            <p class="item-option">Size: S · Color: Black</p>
+            \${item.ref ? `<p style="font-size:11px;color:var(--gold);margin-top:4px;">🔗 \${item.ref}</p>` : ''}
+          </div>
+        </div>
+        <div class="item-price">₩${item.price.toLocaleString()}</div>
+        <div class="item-qty">
+          <button class="qty-btn" onclick="changeQty(${item.id}, -1)">−</button>
+          <input class="qty-num" type="number" value="${item.qty}" min="1" max="10"
+            onchange="setQty(${item.id}, this.value)"/>
+          <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
+        </div>
+        <div class="item-total">₩${(item.price * item.qty).toLocaleString()}</div>
+        <button class="item-remove" onclick="removeItem(${item.id})">×</button>
+      </div>
+    `).join('');
+  }
+
+  function changeQty(id, delta) {
+    const item = cart.find(x => x.id === id);
+    if (!item) return;
+    item.qty = Math.max(1, Math.min(10, item.qty + delta));
+    save();
+  }
+
+  function setQty(id, val) {
+    const item = cart.find(x => x.id === id);
+    if (!item) return;
+    item.qty = Math.max(1, Math.min(10, parseInt(val) || 1));
+    save();
+
+  function removeItem(id) {
+    cart = cart.filter(x => x.id !== id);
+    save();
+    showToast('상품이 삭제되었습니다');
+  }
+
+  function save() {
+    localStorage.setItem('leel_cart', JSON.stringify(cart));
+    init();
+  }
+
+  function updateSummary() {
+    const subtotal = cart.reduce((s,i) => s + i.price * i.qty, 0);
+    const shipping = subtotal === 0 ? 0 : subtotal >= 50000 ? 0 : 3000;
+    const total = subtotal + shipping - discount;
+
+    document.getElementById('subtotalVal').textContent = `₩${subtotal.toLocaleString()}`;
+    document.getElementById('shippingVal').textContent = shipping === 0 && subtotal > 0 ? '무료' : `₩${shipping.toLocaleString()}`;
+    document.getElementById('totalVal').textContent = `₩${total.toLocaleString()}`;
+
+    if (discount > 0) {
+      document.getElementById('discountRow').style.display = 'flex';
+      document.getElementById('discountVal').textContent = `-₩${discount.toLocaleString()}`;
+    }
+  }
+
+  function applyCoupon() {
+    const code = document.getElementById('couponInput').value.trim().toUpperCase();
+    const coupons = { 'LEEL10': 10000, 'WELCOME': 5000, 'VIP20': 20000 };
+    if (coupons[code]) {
+      discount = coupons[code];
+      updateSummary();
+      showToast(`쿠폰 적용! ₩${discount.toLocaleString()} 할인`);
+    } else {
+      showToast('유효하지 않은 쿠폰 코드입니다');
+    }
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  init();
+</script>
+</body>
+</html>

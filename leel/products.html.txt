@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Products — LEEL</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --black: #0a0a0a; --white: #ffffff;
+      --gray-light: #f5f5f5; --gray-mid: #e0e0e0;
+      --gray-dark: #888888; --gold: #c9a96e;
+      --font-en: 'Cormorant Garamond', serif;
+      --font-kr: 'Noto Sans KR', sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font-kr); background: var(--white); color: var(--black); overflow-x: hidden; }
+
+    /* HEADER */
+    header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 48px; height: 72px;
+      background: rgba(255,255,255,0.96); backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--gray-mid); transition: box-shadow 0.3s;
+    }
+    header.scrolled { box-shadow: 0 2px 20px rgba(0,0,0,0.08); }
+    .logo { font-family: var(--font-en); font-size: 28px; font-weight: 600; letter-spacing: 6px; color: var(--black); text-decoration: none; }
+    nav { display: flex; gap: 36px; }
+    nav a { font-size: 13px; font-weight: 400; letter-spacing: 2px; text-transform: uppercase; color: var(--black); text-decoration: none; position: relative; padding-bottom: 4px; }
+    nav a::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 1px; background: var(--black); transition: width 0.3s; }
+    nav a:hover::after { width: 100%; }
+    nav a.active::after { width: 100%; }
+    .header-icons { display: flex; gap: 20px; align-items: center; }
+    .header-icons a { color: var(--black); text-decoration: none; font-size: 13px; letter-spacing: 1px; }
+    .icon-btn { background: none; border: none; cursor: pointer; font-size: 18px; color: var(--black); position: relative; }
+    .cart-badge { position: absolute; top: -6px; right: -8px; background: var(--black); color: var(--white); font-size: 9px; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+    /* PAGE HERO */
+    .page-hero {
+      margin-top: 72px; padding: 60px 48px;
+      background: var(--gray-light);
+      border-bottom: 1px solid var(--gray-mid);
+    }
+    .page-hero p { font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: var(--gray-dark); margin-bottom: 8px; font-family: var(--font-en); }
+    .page-hero h1 { font-family: var(--font-en); font-size: 48px; font-weight: 300; letter-spacing: 6px; }
+
+    /* LAYOUT */
+    .shop-layout { display: grid; grid-template-columns: 240px 1fr; gap: 0; min-height: 80vh; }
+
+    /* SIDEBAR */
+    .sidebar {
+      padding: 40px 32px; border-right: 1px solid var(--gray-mid);
+      position: sticky; top: 72px; height: calc(100vh - 72px); overflow-y: auto;
+    }
+    .filter-section { margin-bottom: 36px; }
+    .filter-title {
+      font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--black); margin-bottom: 16px; font-family: var(--font-en);
+      padding-bottom: 10px; border-bottom: 1px solid var(--gray-mid);
+    }
+    .filter-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; cursor: pointer; }
+    .filter-item input[type="checkbox"] { width: 14px; height: 14px; accent-color: var(--black); cursor: pointer; }
+    .filter-item label { font-size: 13px; color: var(--black); cursor: pointer; letter-spacing: 0.5px; }
+    .filter-item span { font-size: 11px; color: var(--gray-dark); margin-left: auto; }
+
+    .price-range { padding: 4px 0; }
+    .price-range input[type="range"] { width: 100%; accent-color: var(--black); margin-bottom: 8px; }
+    .price-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--gray-dark); }
+
+    .color-swatches { display: flex; gap: 8px; flex-wrap: wrap; }
+    .swatch {
+      width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
+      border: 2px solid transparent; transition: border-color 0.2s;
+    }
+    .swatch.active, .swatch:hover { border-color: var(--black); }
+
+    .filter-reset {
+      width: 100%; padding: 12px; background: none; border: 1px solid var(--gray-mid);
+      font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+      cursor: pointer; color: var(--gray-dark); transition: all 0.2s; font-family: var(--font-kr);
+    }
+    .filter-reset:hover { border-color: var(--black); color: var(--black); }
+
+    /* PRODUCT AREA */
+    .product-area { padding: 40px 48px; }
+    .product-toolbar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 32px; padding-bottom: 20px; border-bottom: 1px solid var(--gray-mid);
+    }
+    .product-count { font-size: 13px; color: var(--gray-dark); letter-spacing: 1px; }
+    .toolbar-right { display: flex; align-items: center; gap: 20px; }
+    .sort-select {
+      padding: 10px 16px; border: 1px solid var(--gray-mid); font-size: 13px;
+      font-family: var(--font-kr); outline: none; background: var(--white); cursor: pointer;
+    }
+    .view-toggle { display: flex; gap: 8px; }
+    .view-btn {
+      width: 36px; height: 36px; border: 1px solid var(--gray-mid);
+      background: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-size: 14px; transition: all 0.2s;
+    }
+    .view-btn.active { background: var(--black); color: var(--white); border-color: var(--black); }
+
+    /* GRID */
+    .product-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .product-grid.list-view { grid-template-columns: 1fr; }
+
+    .product-card { cursor: pointer; }
+    .product-img-wrap {
+      position: relative; overflow: hidden; aspect-ratio: 3/4;
+      background: var(--gray-light); margin-bottom: 16px;
+    }
+    .product-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
+    .product-card:hover .product-img-wrap img { transform: scale(1.05); }
+    .product-overlay {
+      position: absolute; inset: 0; background: rgba(0,0,0,0.25);
+      display: flex; align-items: flex-end; justify-content: center;
+      padding-bottom: 20px; opacity: 0; transition: opacity 0.3s;
+    }
+    .product-card:hover .product-overlay { opacity: 1; }
+    .overlay-btn {
+      padding: 12px 28px; background: var(--white); color: var(--black);
+      font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+      border: none; cursor: pointer; transition: all 0.2s;
+    }
+    .overlay-btn:hover { background: var(--black); color: var(--white); }
+    .product-badge {
+      position: absolute; top: 12px; left: 12px;
+      background: var(--black); color: var(--white);
+      font-size: 10px; letter-spacing: 1px; padding: 4px 10px;
+    }
+    .product-badge.sale { background: #c0392b; }
+    .wishlist-btn {
+      position: absolute; top: 12px; right: 12px;
+      background: var(--white); border: none; width: 32px; height: 32px;
+      border-radius: 50%; cursor: pointer; font-size: 14px;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .product-card:hover .wishlist-btn { opacity: 1; }
+    .wishlist-btn.liked { opacity: 1; }
+
+    .product-info { display: flex; flex-direction: column; gap: 4px; }
+    .product-category { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--gray-dark); font-family: var(--font-en); }
+    .product-name { font-size: 14px; font-weight: 400; letter-spacing: 0.5px; }
+    .product-price { font-family: var(--font-en); font-size: 16px; font-weight: 300; }
+    .product-price .original { text-decoration: line-through; color: var(--gray-dark); margin-right: 8px; font-size: 14px; }
+    .product-price .sale-price { color: #c0392b; }
+
+    /* LIST VIEW */
+    .product-grid.list-view .product-card { display: grid; grid-template-columns: 200px 1fr; gap: 24px; align-items: start; }
+    .product-grid.list-view .product-img-wrap { aspect-ratio: 3/4; margin-bottom: 0; }
+    .product-grid.list-view .product-info { padding: 16px 0; gap: 12px; }
+    .product-grid.list-view .product-name { font-size: 18px; }
+
+    /* PAGINATION */
+    .pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 60px; padding-top: 40px; border-top: 1px solid var(--gray-mid); }
+    .page-btn {
+      width: 40px; height: 40px; border: 1px solid var(--gray-mid);
+      background: none; cursor: pointer; font-size: 13px; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .page-btn.active { background: var(--black); color: var(--white); border-color: var(--black); }
+    .page-btn:hover:not(.active) { border-color: var(--black); }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--black); color: var(--white); padding: 14px 32px; font-size: 13px; letter-spacing: 1px; z-index: 9999; transition: transform 0.3s ease; pointer-events: none; }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 1024px) {
+      .shop-layout { grid-template-columns: 1fr; }
+      .sidebar { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--gray-mid); }
+      .product-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      header { padding: 0 24px; }
+      nav { display: none; }
+      .page-hero { padding: 40px 24px; }
+      .product-area { padding: 24px; }
+      .product-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<header id="mainHeader">
+  <a href="index.html" class="logo">LEEL</a>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="products.html" class="active">Collection</a>
+    <a href="#">Tops</a>
+    <a href="#">Bottoms</a>
+    <a href="#">Dresses</a>
+    <a href="#">Sale</a>
+  </nav>
+  <div class="header-icons">
+    <a href="login.html">로그인</a>
+    <button class="icon-btn" onclick="location.href='cart.html'">
+      🛍
+      <span class="cart-badge" id="cartCount">0</span>
+    </button>
+  </div>
+</header>
+
+<div class="page-hero">
+  <p>LEEL Collection</p>
+  <h1>All Products</h1>
+</div>
+
+<div class="shop-layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="filter-section">
+      <p class="filter-title">Category</p>
+      <div class="filter-item"><input type="checkbox" id="cat-all" checked/><label for="cat-all">All</label><span>158</span></div>
+      <div class="filter-item"><input type="checkbox" id="cat-dress"/><label for="cat-dress">Dresses</label><span>32</span></div>
+      <div class="filter-item"><input type="checkbox" id="cat-top"/><label for="cat-top">Tops</label><span>48</span></div>
+      <div class="filter-item"><input type="checkbox" id="cat-bottom"/><label for="cat-bottom">Bottoms</label><span>36</span></div>
+      <div class="filter-item"><input type="checkbox" id="cat-outer"/><label for="cat-outer">Outer</label><span>24</span></div>
+      <div class="filter-item"><input type="checkbox" id="cat-acc"/><label for="cat-acc">Accessories</label><span>18</span></div>
+    </div>
+
+    <div class="filter-section">
+      <p class="filter-title">Price</p>
+      <div class="price-range">
+        <input type="range" min="0" max="300000" value="300000" step="10000" id="priceRange" oninput="updatePrice(this.value)"/>
+        <div class="price-labels"><span>₩0</span><span id="priceMax">₩300,000</span></div>
+      </div>
+    </div>
+
+    <div class="filter-section">
+      <p class="filter-title">Size</p>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="swatch" style="width:auto;height:auto;border-radius:0;padding:6px 12px;font-size:12px;border:1px solid var(--gray-mid);background:none;cursor:pointer;" onclick="toggleSize(this)">XS</button>
+        <button class="swatch" style="width:auto;height:auto;border-radius:0;padding:6px 12px;font-size:12px;border:1px solid var(--gray-mid);background:none;cursor:pointer;" onclick="toggleSize(this)">S</button>
+        <button class="swatch" style="width:auto;height:auto;border-radius:0;padding:6px 12px;font-size:12px;border:1px solid var(--gray-mid);background:none;cursor:pointer;" onclick="toggleSize(this)">M</button>
+        <button class="swatch" style="width:auto;height:auto;border-radius:0;padding:6px 12px;font-size:12px;border:1px solid var(--gray-mid);background:none;cursor:pointer;" onclick="toggleSize(this)">L</button>
+        <button class="swatch" style="width:auto;height:auto;border-radius:0;padding:6px 12px;font-size:12px;border:1px solid var(--gray-mid);background:none;cursor:pointer;" onclick="toggleSize(this)">XL</button>
+      </div>
+    </div>
+
+    <div class="filter-section">
+      <p class="filter-title">Color</p>
+      <div class="color-swatches">
+        <div class="swatch" style="background:#0a0a0a;" title="Black" onclick="toggleSwatch(this)"></div>
+        <div class="swatch" style="background:#ffffff;border:1px solid #e0e0e0;" title="White" onclick="toggleSwatch(this)"></div>
+        <div class="swatch" style="background:#c9a96e;" title="Beige" onclick="toggleSwatch(this)"></div>
+        <div class="swatch" style="background:#8b7355;" title="Brown" onclick="toggleSwatch(this)"></div>
+        <div class="swatch" style="background:#2c3e50;" title="Navy" onclick="toggleSwatch(this)"></div>
+        <div class="swatch" style="background:#e8d5c4;" title="Cream" onclick="toggleSwatch(this)"></div>
+      </div>
+    </div>
+
+    <button class="filter-reset" onclick="resetFilters()">필터 초기화</button>
+  </aside>
+
+  <!-- PRODUCT AREA -->
+  <main class="product-area">
+    <div class="product-toolbar">
+      <p class="product-count" id="productCount">총 12개 상품</p>
+      <div class="toolbar-right">
+        <select class="sort-select" onchange="sortProducts(this.value)">
+          <option value="newest">최신순</option>
+          <option value="price-asc">가격 낮은순</option>
+          <option value="price-desc">가격 높은순</option>
+          <option value="popular">인기순</option>
+        </select>
+        <div class="view-toggle">
+          <button class="view-btn active" onclick="setView('grid', this)">⊞</button>
+          <button class="view-btn" onclick="setView('list', this)">☰</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-grid" id="productGrid"></div>
+
+    <div class="pagination">
+      <button class="page-btn" onclick="changePage(currentPage-1)">‹</button>
+      <button class="page-btn active" id="page-1" onclick="changePage(1)">1</button>
+      <button class="page-btn" id="page-2" onclick="changePage(2)">2</button>
+      <button class="page-btn" id="page-3" onclick="changePage(3)">3</button>
+      <button class="page-btn" onclick="changePage(currentPage+1)">›</button>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const products = [
+    { id:1, name:"Minimal Linen Dress", price:89000, badge:"New", category:"dress", img:"https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&q=80" },
+    { id:2, name:"Silk Wrap Blouse", price:65000, originalPrice:82000, badge:"Sale", category:"top", img:"https://images.unsplash.com/photo-1485968579580-b6d095142e6e?w=400&q=80" },
+    { id:3, name:"Wide Leg Trousers", price:72000, badge:"New", category:"bottom", img:"https://images.unsplash.com/photo-1509631179647-0177331693ae?w=400&q=80" },
+    { id:4, name:"Cotton Knit Cardigan", price:58000, badge:null, category:"outer", img:"https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400&q=80" },
+    { id:5, name:"Pleated Midi Skirt", price:68000, badge:"New", category:"bottom", img:"https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?w=400&q=80" },
+    { id:6, name:"Lace Trim Camisole", price:42000, badge:null, category:"top", img:"https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=400&q=80" },
+    { id:7, name:"Oversized Blazer", price:128000, badge:null, category:"outer", img:"https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=400&q=80" },
+    { id:8, name:"Floral Wrap Dress", price:95000, originalPrice:118000, badge:"Sale", category:"dress", img:"https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=400&q=80" },
+    { id:9, name:"Ribbed Tank Top", price:32000, badge:null, category:"top", img:"https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=400&q=80" },
+    { id:10, name:"Tailored Shorts", price:55000, badge:"New", category:"bottom", img:"https://images.unsplash.com/photo-1560243563-062bfc001d68?w=400&q=80" },
+    { id:11, name:"Satin Slip Dress", price:112000, badge:null, category:"dress", img:"https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=400&q=80" },
+    { id:12, name:"Cropped Denim Jacket", price:88000, badge:null, category:"outer", img:"https://images.unsplash.com/photo-1551537482-f2075a1d41f2?w=400&q=80" },
+  ];
+
+  let cart = JSON.parse(localStorage.getItem('leel_cart') || '[]');
+  let wishlist = JSON.parse(localStorage.getItem('leel_wishlist') || '[]');
+  let currentPage = 1;
+  let currentView = 'grid';
+
+  // 레퍼럴 추적
+  const urlParams = new URLSearchParams(window.location.search);
+  const refCode = urlParams.get('ref');
+  if (refCode) sessionStorage.setItem('leel_ref', refCode);
+
+  function updateCartBadge() {
+    const total = cart.reduce((s,i) => s + i.qty, 0);
+    document.getElementById('cartCount').textContent = total;
+  }
+  updateCartBadge();
+
+  function renderProducts(list = products) {
+    const grid = document.getElementById('productGrid');
+    document.getElementById('productCount').textContent = `총 \${list.length}개 상품`;
+    grid.innerHTML = list.map(p => `
+      <div class="product-card" onclick="location.href='product.html?id=${p.id}'">
+        <div class="product-img-wrap">
+          <img src="${p.img}" alt="${p.name}" loading="lazy"/>
+          \${p.badge ? `<span class="product-badge \${p.badge === 'Sale' ? 'sale' : ''}">${p.badge}</span>` : ''}
+          <button class="wishlist-btn \${wishlist.includes(p.id) ? 'liked' : ''}"
+            onclick="event.stopPropagation(); toggleWishlist(${p.id}, this)">
+            \${wishlist.includes(p.id) ? '♥' : '♡'}
+          </button>
+          <div class="product-overlay">
+            <button class="overlay-btn" onclick="event.stopPropagation(); addToCart(${p.id})">Add to Cart</button>
+          </div>
+        </div>
+        <div class="product-info">
+          <span class="product-category">${p.category}</span>
+          <p class="product-name">${p.name}</p>
+          <p class="product-price">
+            \${p.originalPrice ? `<span class="original">₩${p.originalPrice.toLocaleString()}</span>` : ''}
+            <span class="${p.originalPrice ? 'sale-price' : ''}">₩${p.price.toLocaleString()}</span>
+          </p>
+        </div>
+      </div>
+    `).join('');
+  }
+  renderProducts();
+
+  function addToCart(id) {
+    const p = products.find(x => x.id === id);
+    const ex = cart.find(x => x.id === id);
+    if (ex) ex.qty++; else cart.push({...p, qty:1});
+    localStorage.setItem('leel_cart', JSON.stringify(cart));
+    updateCartBadge();
+    showToast(`${p.name} 장바구니에 담겼습니다`);
+  }
+
+  function toggleWishlist(id, btn) {
+    if (wishlist.includes(id)) {
+      wishlist = wishlist.filter(x => x !== id);
+      btn.textContent = '♡'; btn.classList.remove('liked');
+    } else {
+      wishlist.push(id);
+      btn.textContent = '♥'; btn.classList.add('liked');
+    }
+    localStorage.setItem('leel_wishlist', JSON.stringify(wishlist));
+  }
+
+  function sortProducts(val) {
+    let sorted = [...products];
+    if (val === 'price-asc') sorted.sort((a,b) => a.price - b.price);
+    else if (val === 'price-desc') sorted.sort((a,b) => b.price - a.price);
+    else if (val === 'popular') sorted.sort(() => Math.random() - 0.5);
+    renderProducts(sorted);
+  }
+
+  function setView(view, btn) {
+    currentView = view;
+    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const grid = document.getElementById('productGrid');
+    grid.classList.toggle('list-view', view === 'list');
+  }
+
+  function updatePrice(val) {
+    document.getElementById('priceMax').textContent = `₩${Number(val).toLocaleString()}`;
+    const filtered = products.filter(p => p.price <= val);
+    renderProducts(filtered);
+  }
+
+  function toggleSize(btn) {
+    btn.style.background = btn.style.background === 'rgb(10, 10, 10)' ? '' : 'var(--black)';
+    btn.style.color = btn.style.color === 'white' ? '' : 'white';
+  }
+
+  function toggleSwatch(el) { el.classList.toggle('active'); }
+  function resetFilters() { renderProducts(); showToast('필터가 초기화되었습니다'); }
+
+  function changePage(p) {
+    if (p < 1 || p > 3) return;
+    currentPage = p;
+    document.querySelectorAll('.page-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(`page-${p}`)?.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  window.addEventListener('scroll', () => {
+    document.getElementById('mainHeader').classList.toggle('scrolled', window.scrollY > 20);
+  });
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+</script>
+</body>
+</html>
